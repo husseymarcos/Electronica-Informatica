@@ -1,4 +1,4 @@
-# Acá podes agregar toda la información que consideras necesario.
+# Acá podes agregar toda la información que consideras necesaria.
 
 
 Link del libro de la guía de programación de Arduino: https://arduinobot.pbworks.com/f/Manual+Programacion+Arduino.pdf
