@@ -6,6 +6,8 @@ Link del libro de la guía de programación de Arduino: https://arduinobot.pbwor
 
 Link Sensores Táctiles: https://www.youtube.com/watch?v=07b8nKLS_PM
 
+Link de Wokwi Proyecto_Sube: https://wokwi.com/projects/360711060627404801
+
 
 
 
