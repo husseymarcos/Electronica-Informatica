@@ -1,5 +1,3 @@
-
-
 /*Lo que permite el SCAN es saber la posición hexagesimal del display que voy a utilizar. De esta forma si quiero, 
 por ejemplo si quiero mostrar en un display "hello world" lo que haría con el SCAN es determinar la posición hexagesimal
 que tiene ese display en cuestión. 
@@ -81,5 +79,4 @@ void loop() {
     //Regresamos el indice a 0 para ingresar nuevas letras al password
     indice=0;
   }
-  
 }
