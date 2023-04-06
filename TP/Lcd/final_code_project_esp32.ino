@@ -7,8 +7,20 @@ que tiene ese display en cuestión.
 Lo explicamos con el nro de telefono. Si cada display tiene un nro de telefono distinto, el SCAN permite conocer el nro de telefono
 de cada display. */
 
-// importamos la libreria Keypad
+// importamos la libreria Keypad, y la librería LiquidCrystal_I2C
+
 #include <Keypad.h>
+#include <LiquidCrystal_I2C.h>
+
+// Determinamos el pin donde estan las columnas y las filas del LCD.
+int lcdColumns = 16;
+int lcdRows = 2;
+
+
+// establecezco dirección LCD, número de columnas y filas
+// si no conoce su dirección de visualización, ejecute un boceto de escáner I2C. Eso lo hace el método SCAN.
+
+LiquidCrystal_I2C lcd(0x27, lcdColumns, lcdRows);
 
 // define numero de filas
 const uint8_t ROWS = 4;
@@ -44,9 +56,14 @@ int pinLedVerde=12;
 int pinLedRojo=13;
 
 void setup() {
+  // initialize LCD
+  lcd.init();
+  // turn on LCD backlight                      
+  lcd.backlight();
   pinMode(pinLedVerde, OUTPUT);
   pinMode(pinLedRojo, OUTPUT);
   Serial.begin(115200);
+
 }
 
 void loop() {
@@ -62,6 +79,7 @@ void loop() {
     Serial.println(key);
     digitalWrite(pinLedVerde, LOW);
     digitalWrite(pinLedRojo, LOW);
+
   }
 
   //Si ya se ingresaron 6 letras o mas
@@ -71,15 +89,24 @@ void loop() {
       // Mostramos el mensaje de acceso permitido
       Serial.println("Acceso permitido");
       digitalWrite(pinLedVerde, HIGH);
-    }
+
+      if(pinLedVerde = HIGH){
+        lcd.setCursor(0, 0);
+        lcd.print("Buen dia! Seleccione una opcion:"); // Para poder ver otras opciones pensaba en que podemos usar botones.
+        delay(10000);
+        lcd.clear();
+        lcd.print("Opcion 1: Transferir Creditos");
+        delay(10000);
+        lcd.clear();
+      }  
+      }
     //Si el password NO coincide con la clave ingresada
     else{
-      // Mostramos el mensaje de acceso denegado
-      Serial.println("Acceso denegado");
-      digitalWrite(pinLedRojo, HIGH);
+        // Mostramos el mensaje de acceso denegado
+        Serial.println("Acceso denegado");
+        digitalWrite(pinLedRojo, HIGH);
     }
-    //Regresamos el indice a 0 para ingresar nuevas letras al password
+    //Regresamos el indice a 0 para ingresar nuevas letras al password 
     indice=0;
-  }
-  
+  }   
 }
