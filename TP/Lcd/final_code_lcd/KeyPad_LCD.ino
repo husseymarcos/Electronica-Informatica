@@ -95,10 +95,27 @@ void loop() {
         lcd.print("Buen dia! Seleccione una opcion:"); // Para poder ver otras opciones pensaba en que podemos usar botones.
         delay(10000);
         lcd.clear();
-        lcd.print("Opcion 1: Transferir Creditos");
+        option1 = lcd.print("Opcion 1: Transferir Creditos");
         delay(10000);
         lcd.clear();
-      }  
+        option2 = lcd.print("Opcion 2: Cargar Creditos");
+        delay(10000);
+        lcd.clear();
+        option3 = lcd.print("Opcion 3: Consultar Creditos");
+        delay(10000);
+        lcd.clear();
+        option4 = lcd.print("Opcion 4: Jugar un Juego");
+        delay(10000);
+        lcd.clear();
+
+        // Como trato con los botones?
+        if(option1 == keys[1][1]){
+                // Realizar la operacion de Transferir
+        }
+        if(option2 == keys[1][2]){
+            // Realizar la operacion de cargar creditos
+        }
+      }
       }
     //Si el password NO coincide con la clave ingresada
     else{
@@ -108,5 +125,6 @@ void loop() {
     }
     //Regresamos el indice a 0 para ingresar nuevas letras al password 
     indice=0;
-  }   
+
+  }
 }
