@@ -2,9 +2,10 @@ package Methods;
 
 import java.sql.Array;
 
+
 // Clase que representa las tarjetas con lector RFID
 public class Card implements Operations {
-    // Código que determina qué tarjetas son válidas y no.
+    // Código que determina qué tarjetas son válidas y no  .
     private int code;
     private int uid; //HEXA -> 'uid' de la tarjeta
     public int balance; // Saldo
