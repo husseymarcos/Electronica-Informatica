@@ -7,7 +7,7 @@
 #include <MFRC522.h>          // Se incluye la librería del módulo RFID
 #include <SPI.h>              // Se incluye la librería del SPI
 #include <LiquidCrystal.h>    // Se incluye la librería del LCD
-#include "CardOperation.h"    // Se incluye la clase de las operaciones de las tarjetas
+#include "Card.h"             // Se incluye la clase de las operaciones de las tarjetas
 
 int lcdColumns = 16;
 
@@ -94,13 +94,13 @@ void loop() {
         if(key != NO_KEY){        // Se verifica si se presiono una tela
           switch(key){
             case '1':
-                transferAmount(); // Tiene como argumentos, el otro jugador y el monto que quiero pasarle
+                CreditTransfer(); // Tiene como argumentos, el otro jugador y el monto que quiero pasarle
               break;
             case '2':
-                addAmount();      // Tiene como argumentos el saldo que debería cargarse.
+                CreditLoad();      // Tiene como argumentos el saldo que debería cargarse.
               break;
             case '3':
-                getBalance();     // Retorna el saldo actual.
+                ConsultCredit();     // Retorna el saldo actual.
               break;
             default:
               Serial.println("Opción no válida.");

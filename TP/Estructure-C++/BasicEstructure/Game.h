@@ -1,9 +1,12 @@
-class Game {
+#include <string>
+
+class Game{
 public:
-    int cost;
-    string name;
-    Game(String name, int cost) {
-        this->cost = cost;
-        this->name = name;
-    }
-};
+  int cost;
+  std:: string name;
+
+  Game(std:: string name, int cost){
+    this->name = name;
+    this->cost = cost;
+  }
+}
