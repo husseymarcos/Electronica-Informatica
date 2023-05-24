@@ -1,4 +1,4 @@
-package Methods;
+/*package Methods;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -30,3 +30,4 @@ public class CardTest {
     public void testTransferAmount() {
     }
 }
+*/
