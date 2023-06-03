@@ -1,2 +1,6 @@
 C8:F0:9E:52:86:9C - Carlos - Maestro
 C8:F0:9E:53:05:D8 - Marcos - Esclavo
+
+
+// Dirección MAC del esclavo
+uint8_t slaveMacAddress[] = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC};
