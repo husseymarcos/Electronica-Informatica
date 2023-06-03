@@ -1,78 +1,64 @@
-#include <WiFi.h>
-#include <esp_now.h>
-#include <SD.h>
-#include <SPI.h>
+#include <Wire.h>
+#include <Keypad.h>
+#include <LiquidCrystal_I2C.h>
 #include <MFRC522.h>
+#include <SPI.h>
+#include <esp_now.h>
+#include <Adafruit_NeoPixel.h>
 
-// Definir pines de la tarjeta micro SD
-#define SD_CS_PIN 5
+#define SS_PIN 5  // Pin del módulo RC522
+#define RST_PIN 22  // Pin de reset del módulo RC522
 
-// Definir pines del lector RFID
-#define RST_PIN 9
-#define SS_PIN 10
+MFRC522 mfrc522(SS_PIN, RST_PIN);  // Crear instancia del lector RFID
 
-// Dirección MAC del esclavo
-uint8_t slaveMacAddress[] = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC}; // Reemplaza con la dirección MAC del esclavo
+// Configuración del Keypad
+const byte ROWS = 4; // Número de filas
+const byte COLS = 4; // Número de columnas
+char keys[ROWS][COLS] = {
+  {'1', '2', '3', 'A'},
+  {'4', '5', '6', 'B'},
+  {'7', '8', '9', 'C'},
+  {'*', '0', '#', 'D'}
+};
+byte rowPins[ROWS] = {23, 19, 18, 5}; // Conexiones de los pines de las filas
+byte colPins[COLS] = {17, 16, 4, 2}; // Conexiones de los pines de las columnas
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
-// Estructura para almacenar los datos a enviar
-typedef struct __attribute__((packed)) {
-  int data;
-} MyData;
+// Configuración del LCD
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-MFRC522 mfrc522(SS_PIN, RST_PIN); // Inicializar el objeto MFRC522
+// Configuración de la tira de LED
+#define LED_PIN 15
+#define LED_COUNT 1
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+// Dirección MAC del ESP32 esclavo
+uint8_t slaveAddress[] = {0xC8, 0xF0, 0x9E, 0x53, 0x05, 0xD8};
 
 void setup() {
-  // Inicializar el puerto serie
   Serial.begin(115200);
+  SPI.begin(); // Iniciar comunicación SPI
+  mfrc522.PCD_Init(); // Iniciar el lector RFID
+  lcd.begin(16, 2); // Iniciar el LCD
+  strip.begin(); // Iniciar la tira de LED
+  strip.setPixelColor(0, 0, 255, 0); // Establecer color verde al LED
+  strip.show(); // Mostrar el color en el LED
 
-  // Inicializar la tarjeta micro SD
-  if (!SD.begin(SD_CS_PIN)) {
-    Serial.println("Error al inicializar la tarjeta SD");
-    while (1);
-  }
-
-  // Inicializar el lector RFID
-  SPI.begin();
-  mfrc522.PCD_Init();
-
-  // Inicializar ESP-NOW
   if (esp_now_init() != ESP_OK) {
     Serial.println("Error al inicializar ESP-NOW");
-    while (1);
+    return;
   }
 
-  // Configurar la dirección MAC del esclavo
-  esp_now_peer_info_t peerInfo;
-  memcpy(peerInfo.peer_addr, slaveMacAddress, sizeof(slaveMacAddress));
-  peerInfo.channel = 0;
-  peerInfo.encrypt = false;
+  esp_now_set_self_role(ESP_NOW_ROLE_CONTROLLER); // Configurar ESP-NOW como controlador
+  esp_now_add_peer(slaveAddress, ESP_NOW_ROLE_SLAVE, 1, NULL, 0); // Agregar el ESP32 esclavo
 
-  // Agregar el esclavo como peer
-  if (esp_now_add_peer(&peerInfo) != ESP_OK) {
-    Serial.println("Error al agregar el peer");
-    while (1);
-  }
-}
-
-void loop() {
-  // Verificar si se detectó una tarjeta RFID
-  if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-    // Obtener el número UID de la tarjeta RFID
-    String cardUid = "";
-    for (byte i = 0; i < mfrc522.uid.size; i++) {
-      cardUid += String(mfrc522.uid.uidByte[i] < 0x10 ? "0" : "");
-      cardUid += String(mfrc522.uid.uidByte[i], HEX);
+  // Función de callback para recibir datos del esclavo
+  esp_now_register_recv_cb([](const uint8_t* mac, const uint8_t* data, int len) {
+    Serial.print("Datos recibidos del esclavo: ");
+    for (int i = 0; i < len; i++) {
+      Serial.print((char)data[i]);
     }
-
-    // Crear el objeto de datos y asignarle un valor
-    MyData myData;
-    myData.data = random(100);
-
-    // Enviar los datos al esclavo a través de ESP-NOW
-    esp_now_send(slaveMacAddress, (uint8_t *)&myData, sizeof(myData));
-
-    // Detener la detección de la tarjeta RFID
-    mfrc522.PICC_HaltA();
-    mfrc522.PCD_StopCrypto1();
-  }
+    Serial.println();
+  });
 }
+
