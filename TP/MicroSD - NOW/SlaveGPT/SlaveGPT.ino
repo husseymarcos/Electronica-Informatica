@@ -1,69 +1,59 @@
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
-#include <esp_now.h>
+//Faltaria la situacion en la cual se saque y vuelva a poner la tarjeta. Hacer una funcion la cual identifique la tarjeta (Esta en ChatGPT)
+
 #include <WiFi.h>
+#include <esp_now.h>
+#include <SD.h>
 
-#define SD_CS_PIN     5 // Pin CS de la tarjeta microSD
-#define BUFFER_SIZE   1024 // Tamaño del búfer de datos
+// Definir pines de la tarjeta micro SD
+#define SD_CS_PIN 5
 
-// Estructura para almacenar los datos que se enviarán por ESP-NOW
-typedef struct {
-  uint8_t data[BUFFER_SIZE];
-  size_t length;
-} payload_t;
+// Estructura para almacenar los datos recibidos
+typedef struct __attribute__((packed)) {
+  int data;
+} MyData;
 
-payload_t payload;
+// Callback para recibir datos a través de ESP-NOW
+void OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
+  MyData receivedData;
+  memcpy(&receivedData, data, sizeof(receivedData));
 
-// Función para inicializar ESP-NOW
-void initESPNow() {
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("Error al inicializar ESP-NOW");
-    return;
+  // Guardar el dato en la tarjeta micro SD
+  File file1 = SD.open("/data1.txt", FILE_APPEND); //Este archivo seria el de la operaciones de la tarjeta especifica
+  if (file1) {
+    file1.println(receivedData.data);
+    file1.close();
   }
-}
 
-// Función de devolución de llamada que
-void onDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
-  // Escribir los datos recibidos en la tarjeta microSD
-  File file = SD.open("/datos_recibidos.txt", FILE_WRITE);
-  if (file) {
-    file.write(data, data_len);
-    file.close();
-    Serial.println("Datos recibidos y escritos en la tarjeta microSD");
-  } else {
-    Serial.println("Error al abrir el archivo en la tarjeta microSD");
+  File file2 = SD.open("/data2.txt", FILE_APPEND);  //Este archivo seria el .log que contiene todos los registros de todas las operaciones de todas las tarjetas
+  if (file2) {
+    file2.println(receivedData.data);
+    file2.close();
   }
-}
-
-// Función para inicializar la tarjeta microSD
-void initSDCard() {
-  if (!SD.begin(SD_CS_PIN)) {
-    Serial.println("Error al inicializar la tarjeta microSD");
-    return;
-  }
-  Serial.println("Tarjeta microSD inicializada correctamente");
 }
 
 void setup() {
+  // Inicializar el puerto serie
   Serial.begin(115200);
 
-  // Inicializar la tarjeta microSD
-  initSDCard();
+  // Inicializar la tarjeta micro SD
+  if (!SD.begin(SD_CS_PIN)) {
+    Serial.println("Error al inicializar la tarjeta SD");
+    while (1);
+  }
 
   // Inicializar ESP-NOW
-  initESPNow();
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Error al inicializar ESP-NOW");
+    while (1);
+  }
 
-  // Registrar la función de devolución de llamada para los mensajes recibidos
-  esp_now_register_recv_cb(onDataRecv);
-
-  // Configurar el dispositivo como esclavo de ESP-NOW
+  // Configurar el ESP-NOW en modo esclavo
   esp_now_set_self_role(ESP_NOW_ROLE_SLAVE);
 
-  Serial.println("Listo para recibir datos por ESP-NOW");
+  // Registrar el callback para recibir datos
+  esp_now_register_recv_cb(OnDataRecv);
 }
 
 void loop() {
-  // No se requiere acción en el bucle principal para el esclavo
+  // No es necesario realizar ninguna acción en el loop del esclavo
 }
-

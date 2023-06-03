@@ -1,76 +1,44 @@
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
-#include <esp_now.h>
 #include <WiFi.h>
+#include <esp_now.h>
 
-#define SD_CS_PIN     5 // Pin CS de la tarjeta microSD
-#define BUFFER_SIZE   1024 // Tamaño del búfer de datos
+// Dirección MAC del esclavo
+uint8_t slaveMacAddress[] = {0xC8, 0xF0, 0x9E, 0x53, 0x05, 0xD8};
 
-// Estructura para almacenar los datos que se enviarán por ESP-NOW
-typedef struct {
-  uint8_t data[BUFFER_SIZE];
-  size_t length;
-} payload_t;
-
-payload_t payload;
-
-// Función para inicializar ESP-NOW
-void initESPNow() {
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("Error al inicializar ESP-NOW");
-    return;
-  }
-}
-
-// Función de devolución de llamada que se ejecuta cuando se recibe un mensaje a través de ESP-NOW
-void onDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
-  // No se requiere acción para el maestro
-}
-
-// Función para inicializar la tarjeta microSD
-void initSDCard() {
-  if (!SD.begin(SD_CS_PIN)) {
-    Serial.println("Error al inicializar la tarjeta microSD");
-    return;
-  }
-  Serial.println("Tarjeta microSD inicializada correctamente");
-}
+// Estructura para almacenar los datos a enviar
+typedef struct __attribute__((packed)) {
+  int data; //La idea es mandar ints, con un sistema propio para identificar las operaciones efectuadas
+} MyData;
 
 void setup() {
+  // Inicializar el puerto serie
   Serial.begin(115200);
 
-  // Inicializar la tarjeta microSD
-  initSDCard();
-
   // Inicializar ESP-NOW
-  initESPNow();
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Error al inicializar ESP-NOW");
+    while (1);
+  }
 
-  // Registrar la función de devolución de llamada para los mensajes recibidos
-  esp_now_register_recv_cb(onDataRecv);
-
-  // Agregar la dirección MAC del esclavo al grupo de destinos de ESP-NOW
+  // Configurar la dirección MAC del esclavo
   esp_now_peer_info_t peerInfo;
-  memcpy(peerInfo.peer_addr, C8:F0:9E:53:05:D8, 6);
-  esp_now_add_peer(&peerInfo);
+  memcpy(peerInfo.peer_addr, slaveMacAddress, sizeof(slaveMacAddress));
+  peerInfo.channel = 0;
+  peerInfo.encrypt = false;
 
-  Serial.println("Listo para enviar datos por ESP-NOW");
+  // Agregar el esclavo como peer
+  if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+    Serial.println("Error al agregar el peer");
+    while (1);
+  }
 }
 
 void loop() {
-  // Leer datos de la tarjeta microSD
-  File file = SD.open("/datos.txt");
-  if (file) {
-    // Leer los datos en el búfer
-    payload.length = file.read(payload.data, BUFFER_SIZE);
+  // Esperar un poco antes de enviar datos
+  delay(2000);
 
-    // Enviar los datos por ESP-NOW
-    esp_now_send(NULL, (uint8_t*)&payload, sizeof(payload));
+  // Crear el objeto de datos y asignarle un valor
+  MyData myData;
+  myData.data = random(100);  //Aca habria que unir el codigo del keypad asi dependiendo lo que toque el usuario que datos se mandan a la micro sd
 
-    file.close();
-  } else {
-    Serial.println("Error al abrir el archivo en la tarjeta microSD");
-  }
-
-  delay(1000); // Esperar un segundo antes de enviar nuevos datos
-}
+  // Enviar los datos al esclavo a través de ESP-NOW
+  esp_now_send
