@@ -5,6 +5,7 @@
 #include <SPI.h>
 #include <esp_now.h>
 #include <WiFi.h>
+#include "FS.h"
 
 // Configuración de la tarjeta microSD
 #define SD_CS_PIN 5  // Pin del chip select de la tarjeta microSD
