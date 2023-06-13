@@ -55,7 +55,11 @@ struct Tarjeta {
   int usuario;
   int balance;
   int contrasena;
-};
+}
+
+const int MAX_TARJETAS = 10;
+Tarjeta tarjetas[MAX_TARJETAS]; // Arreglo de estructuras para almacenar las tarjetas
+int numTarjetas = 0;
 
 const int MAX_TARJETAS = 10;
 Tarjeta tarjetas[MAX_TARJETAS]; // Arreglo de estructuras para almacenar las tarjetas
@@ -108,7 +112,22 @@ void transferirCreditos() {
   while (!Serial.available()) {
     // Esperar a que se ingrese un número
   }
-  origen = Serial.parseInt();
+  String origen = "";
+
+  while (true) {
+    if (Serial.available()) {
+      char c = Serial.read();
+
+      if (c == '#') {
+        break; // Finaliza la entrada del número de tarjeta de origen
+      } else {
+        origen += c;
+        Serial.print(c); // Muestra el número ingresado en el Serial Monitor
+      }
+    }
+  }
+
+  int origen = numeroOrigen.toInt();
 
   // Solicitar número de tarjeta de destino
   Serial.println("Ingrese el número de tarjeta de destino:");
@@ -203,6 +222,13 @@ void consultarCreditos() {
   // Si la tarjeta no fue encontrada, mostrar un mensaje de error
   Serial.println("Error: Tarjeta no encontrada");
 }
+void crearUsuario() {
+  Serial.println("Crear usuario");
+  Serial.println("Enter the user code:");
+  while (!Serial.available()) {
+  }
+  usuario = Serial.parseInt();
+}
 
 // Codigo de las operaciones
 void loop() {
@@ -244,6 +270,9 @@ void loop() {
         cargarCreditos();
         break;
       case '3':
+        consultarCreditos();
+        break;
+      case '4':
         consultarCreditos();
         break;
       default:
