@@ -6,6 +6,8 @@
 #include <Adafruit_NeoPixel.h>
 #include "Card.h"
 #include <SD.h>
+#include <esp_now.h>
+#include <WiFi.h>
 
 // Declaracion de variables y pines
 // RFID
@@ -22,7 +24,7 @@ typedef struct struct_message {
 } struct_message;
 
 struct_message myData;
-
+esp_now_peer_info_t peerInfo;
 
 // KeyPad
 
@@ -74,6 +76,7 @@ void setup() {
   rfid.PCD_Init(); // Iniciar el lector RFID
   Serial.print("Parque de Diversiones");
   Serial.print("Apoye su tarjeta");
+  WiFi.mode(WIFI_STA);
 
   // Leds
   pinMode(pinLedVerde, OUTPUT);
@@ -125,6 +128,22 @@ void loop() {
     }
   }
   delay(250);
+
+
+  //ESPNOW
+  strcpy(myData.a, "THIS IS A CHAR");
+  myData.a = random(1,20); //Definir
+  
+  // Send message via ESP-NOW
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
+   
+  if (result == ESP_OK) {
+    Serial.println("Sent with success");
+  }
+  else {
+    Serial.println("Error sending the data");
+  }
+  delay(2000);
 
   // Considerar aplicar una condicion para que esto aparezca.
   char key = keypad.getKey();       // Obtiene la tecla presionada y la guarda en una variable

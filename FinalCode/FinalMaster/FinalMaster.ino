@@ -49,16 +49,6 @@ void setup() {
     return;
   }
 
-  esp_now_set_self_role(ESP_NOW_ROLE_CONTROLLER); // Configurar ESP-NOW como controlador
   esp_now_add_peer(slaveAddress, ESP_NOW_ROLE_SLAVE, 1, NULL, 0); // Agregar el ESP32 esclavo
-
-  // Función de callback para recibir datos del esclavo
-  esp_now_register_recv_cb([](const uint8_t* mac, const uint8_t* data, int len) {
-    Serial.print("Datos recibidos del esclavo: ");
-    for (int i = 0; i < len; i++) {
-      Serial.print((char)data[i]);
-    }
-    Serial.println();
-  });
 }
 
