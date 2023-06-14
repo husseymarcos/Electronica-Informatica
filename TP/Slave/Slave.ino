@@ -55,7 +55,7 @@ void OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
     String fileName = String(myData.usuarioOrigen) + ".txt";
     dataFile = SD.open(fileName, FILE_APPEND);
     if (dataFile) {
-      dataFile.println(String(myData.operation) + "," + String(myData.usuarioOrigen) + "," + String(myData.usuarioDestino) + "," + String(myData.creditosTransferir));
+      dataFile.print(String(myData.operation) + "," + String(myData.usuarioOrigen) + "," + String(myData.usuarioDestino) + "," + String(myData.creditosTransferir));
       dataFile.close();
       Serial.println("Datos guardados en el archivo");
   } else {
