@@ -7,6 +7,9 @@
 #include <SD.h>
 #include <esp_now.h>
 #include <WiFi.h>
+#include <map>
+
+
 
 // Declaracion de variables y pines
 // RFID
@@ -19,7 +22,10 @@ MFRC522 rfid(SS_PIN, RST_PIN);  // Crear instancia del lector RFID
 uint8_t slaveAddress[] = {0xC8, 0xF0, 0x9E, 0x53, 0x05, 0xD8};
 
 typedef struct struct_message {
-  int a;
+  int operation;
+  int usuarioOrigen;
+  int usuarioDestino;
+  int creditosTransferir;
 } struct_message;
 
 struct_message myData;
@@ -56,6 +62,10 @@ struct Tarjeta {
   int balance;
   int contrasena;
 };
+
+
+Tarjeta usuarios[100];
+int numUsuarios = 0;
 
 const int MAX_TARJETAS = 10;
 Tarjeta tarjetas[MAX_TARJETAS]; // Arreglo de estructuras para almacenar las tarjetas
@@ -103,8 +113,25 @@ void setup() {
 }
 
 void transferirCreditos() {
+  String usuarioOrigenStr;
   String usuarioDestinoStr;
   int creditosTransferir = 0;
+
+  Serial.println("Ingrese el número de usuario origen:");
+  while (true) {
+    char key = keypad.getKey();
+    if (key) {
+      if (key == '*') {
+        Serial.println(); // Salto de línea
+        break;
+      } else {
+        usuarioOrigenStr += key;
+        Serial.print(key);
+      }
+    }
+  }
+
+  int usuarioOrigen = usuarioOrigenStr.toInt();
 
   Serial.println("Ingrese el número de usuario destino:");
   while (true) {
@@ -138,70 +165,170 @@ void transferirCreditos() {
     }
   }
   
-  Serial.println("\nTransferencia completada:");
-  Serial.print("Usuario destino: ");
-  Serial.println(usuarioDestino);
-  Serial.print("Créditos transferidos: ");
-  Serial.println(creditosTransferir);
+ // Verificar si el usuario de origen existe en el mapa de tarjetas
+  if (numUsuarios > 0) {
+    Tarjeta& tarjetaOrigen = usuarios[usuarioOrigen];  // Obtener referencia a la tarjeta de origen
+
+    // Verificar si el usuario de destino existe en el mapa de tarjetas
+    if (numUsuarios > 0) {
+      Tarjeta& tarjetaDestino = usuarios[usuarioDestino];  // Obtener referencia a la tarjeta de destino
+
+      // Verificar si el usuario de origen tiene suficiente saldo para transferir
+      if (tarjetaOrigen.balance >= creditosTransferir) {
+        // Realizar la transferencia de créditos
+        tarjetaOrigen.balance -= creditosTransferir;
+        tarjetaDestino.balance += creditosTransferir;
+
+        // Mostrar información de la transferencia
+        Serial.println("Transferencia de créditos realizada:");
+        Serial.print("Usuario origen: ");
+        Serial.println(usuarioOrigen);
+        Serial.print("Usuario destino: ");
+        Serial.println(usuarioDestino);
+        Serial.print("Cantidad transferida: ");
+        Serial.println(creditosTransferir);
+      } else {
+        Serial.println("Saldo insuficiente en el usuario de origen");
+      }
+    } else {
+      Serial.println("Usuario destino no encontrado");
+    }
+  } else {
+    Serial.println("Usuario de origen no encontrado");
+  }
+
+
+  myData.usuarioOrigen = usuarioOrigen;
+  myData.usuarioDestino = usuarioDestino;
+  myData.creditosTransferir = creditosTransferir;
 }
 
 void cargarCreditos() {
-  Serial.println("Ha seleccionado Cargar créditos");
+  String usuarioStr;
+  int creditosTransferir = 0;
 
-  int usuario, cantidad;
-
-  // Solicitar número de tarjeta
-  Serial.println("Ingrese el número de tarjeta:");
-  while (!Serial.available()) {
-    // Esperar a que se ingrese un número
+  Serial.println("Ingrese el número de usuario:");
+  while (true) {
+    char key = keypad.getKey();
+    if (key) {
+      if (key == '*') {
+        Serial.println(); // Salto de línea
+        break;
+      } else {
+        usuarioStr += key;
+        Serial.print(key);
+      }
+    }
   }
-  usuario = Serial.parseInt();
+  int usuario = usuarioStr.toInt();
 
-  // Solicitar cantidad a cargar
-  Serial.println("Ingrese la cantidad a cargar:");
-  while (!Serial.available()) {
-    // Esperar a que se ingrese un número
-  }
-  cantidad = Serial.parseInt();
-
-  // Buscar la tarjeta y cargar los créditos
-  for (int i = 0; i < numTarjetas; i++) {
-    if (tarjetas[i].usuario == usuario) {
-      tarjetas[i].balance += cantidad; // Sumar al saldo de la tarjeta
-      Serial.println("Créditos cargados con éxito");
+  Serial.println("\nIngrese la cantidad de créditos a cargar:");
+  while (true) {
+    char key = keypad.getKey();
+    if (key == '#') {
+      Serial.println("Transferencia cancelada");
       return;
+    } else if (key) {
+      if (key >= '0' && key <= '9') {
+        creditosTransferir = creditosTransferir * 10 + (key - '0');
+        Serial.print(key);
+      } else if (key == '*') {
+        break;
+      }
     }
   }
 
-  // Si la tarjeta no fue encontrada, mostrar un mensaje de error
-  Serial.println("Error: Tarjeta no encontrada");
+  if (numUsuarios > 0) {
+    Tarjeta& tarjeta = usuarios[usuario];  // Obtener referencia a la tarjeta de origen
+
+    // Verificar si el usuario de destino existe en el mapa de tarjetas
+    if (numUsuarios > 0) {
+        tarjeta.balance += creditosTransferir;
+
+        // Mostrar información de la transferencia
+        Serial.println("Carga de créditos realizada:");
+        Serial.print("Usuario: ");
+        Serial.println(usuario);
+        Serial.print("Cantidad cargada: ");
+        Serial.println(creditosTransferir);
+    }
+  }
 }
 
+
 void consultarCreditos() {
-  Serial.println("Ha seleccionado Consultar créditos");
+  String usuarioOrigenStr;
 
-  int usuario;
-
-  // Solicitar número de tarjeta
-  Serial.println("Ingrese el número de tarjeta:");
-  while (!Serial.available()) {
-    // Esperar a que se ingrese un número
+  Serial.println("Ingrese el número de usuario:");
+  while (true) {
+    char key = keypad.getKey();
+    if (key) {
+      if (key == '*') {
+        Serial.println(); // Salto de línea
+        break;
+      } else {
+        usuarioOrigenStr += key;
+        Serial.print(key);
+      }
+    }
   }
-  usuario = Serial.parseInt();
+  int usuarioOrigen = usuarioOrigenStr.toInt();
 
-  // Buscar la tarjeta y mostrar el saldo
-  for (int i = 0; i < numTarjetas; i++) {
-    if (tarjetas[i].usuario == usuario) {
-      Serial.print("Saldo de la tarjeta: ");
-      Serial.println(tarjetas[i].balance);
-      return;
+    // Mostrar información del saldo
+  Serial.print("Usuario: ");
+  Serial.println(usuarios[usuarioOrigen].usuario);
+  Serial.print("Saldo actual: ");
+  Serial.println(usuarios[usuarioOrigen].balance);
+}
+
+void registrarUsuario() {
+  String usuarioStr;
+  String balanceStr;
+
+
+  Serial.println("Ingrese el número de usuario:");
+  while (true) {
+    char key = keypad.getKey();
+    if (key) {
+      if (key == '*') {
+        Serial.println(); // Salto de línea
+        break;
+      } else if (key >= '0' && key <= '9') {
+        usuarioStr += key;
+        Serial.print(key);
+      }
     }
   }
 
-  // Si la tarjeta no fue encontrada, mostrar un mensaje de error
-  Serial.println("Error: Tarjeta no encontrada");
+  Serial.println(); // Salto de línea
+
+  Serial.println("Ingrese el balance del usuario:");
+  while (true) {
+    char key = keypad.getKey();
+    if (key) {
+      if (key == '*') {
+        Serial.println(); // Salto de línea
+        break;
+      } else if (key >= '0' && key <= '9') {
+        balanceStr += key;
+        Serial.print(key);
+      }
+    }
+  }
+  Serial.println(); // Salto de línea
+
+  int balance = balanceStr.toInt();
+  int usuario = usuarioStr.toInt();
+
+  // Guardar el usuario en el arreglo de usuarios
 
   
+
+  usuarios[usuario].usuario = usuario;
+  usuarios[usuario].balance = balance;
+
+  numUsuarios++;
+
 }
 
 void showMenu() {
@@ -228,7 +355,7 @@ void showMenu() {
 
 
 // Codigo de las operaciones
-void loop() {
+void loop(){
   static bool menuDisplayed = false;
   
   // Codigo RFID reconocimiento de tarjeta.
@@ -245,10 +372,6 @@ void loop() {
     }
   }
   delay(250);
-  
-
-  // ESPNOW
-  myData.a = random(1, 20); //Definir
 
   // Send message via ESP-NOW
   esp_err_t result = esp_now_send(slaveAddress, (uint8_t *) &myData, sizeof(myData));
@@ -264,11 +387,11 @@ void loop() {
       case '2':
         cargarCreditos();
         break;
-      case '3':
+      case '5':
         consultarCreditos();
         break;
       case '4':
-        consultarCreditos();
+        registrarUsuario();
         break;
       default:
         Serial.println("Opción inválida");
