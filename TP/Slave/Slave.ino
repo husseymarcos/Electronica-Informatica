@@ -11,7 +11,7 @@
 #define SD_CS_PIN 5  // Pin del chip select de la tarjeta microSD
 
 // Leds
-masterAddress[] = {0xC8, 0xF0, 0x9E, 0x52, 0x86, 0x9C};
+uint8_t masterAddress[] = {0xC8, 0xF0, 0x9E, 0x52, 0x86, 0x9C};
 
 //
 
@@ -23,8 +23,26 @@ typedef struct struct_message{
 } struct_message;
 
 struct_message myData;
+File dataFile;
 
-String dataFile = String(myData.usuarioOrigen) + ".txt";
+void OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
+  memcpy(&myData, data, sizeof(myData));
+
+
+
+    Serial.println("Datos recibidos:");
+    Serial.print("Operación: ");
+    Serial.println(myData.operation);
+    Serial.print("Usuario de origen: ");
+    Serial.println(myData.usuarioOrigen);
+    Serial.print("Usuario de destino: ");
+    Serial.println(myData.usuarioDestino);
+    Serial.print("Cantidad: ");
+    Serial.println(myData.creditosTransferir);
+
+
+    
+    String fileName = String(myData.usuarioOrigen) + ".txt";
     dataFile = SD.open(fileName, FILE_APPEND);
     if (dataFile) {
       dataFile.println(String(myData.operation) + "," + String(myData.usuarioOrigen) + "," + String(myData.usuarioDestino) + "," + String(myData.creditosTransferir));
@@ -33,11 +51,7 @@ String dataFile = String(myData.usuarioOrigen) + ".txt";
   } else {
     Serial.println("Error al abrir el archivo");
   }
-    }
-    else {
-      Serial.println("Error al abrir el archivo");
-    }
-  }
+}
 
 void setup() {
   Serial.begin(115200);
@@ -53,7 +67,7 @@ void setup() {
     return;
   }
 
-    esp_now_register_recv_cb(OnRecv);
+    esp_now_register_recv_cb(OnDataRecv);
 
 
     esp_now_peer_info_t peerInfo;
