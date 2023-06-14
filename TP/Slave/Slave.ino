@@ -25,11 +25,21 @@ typedef struct struct_message{
 struct_message myData;
 File dataFile;
 
+void createDir(fs::FS &fs, const char * path){
+    Serial.printf("Creating Dir: %s\n", path);
+    if(fs.mkdir(path)){
+        Serial.println("Dir created");
+    } else {
+        Serial.println("mkdir failed");
+    }
+}
+
+
 void OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
   memcpy(&myData, data, sizeof(myData));
 
 
-
+    
     Serial.println("Datos recibidos:");
     Serial.print("Operación: ");
     Serial.println(myData.operation);
@@ -41,7 +51,7 @@ void OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
     Serial.println(myData.creditosTransferir);
 
 
-    
+    createDir(SD,"/Datos");
     String fileName = String(myData.usuarioOrigen) + ".txt";
     dataFile = SD.open(fileName, FILE_APPEND);
     if (dataFile) {
@@ -51,6 +61,8 @@ void OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
   } else {
     Serial.println("Error al abrir el archivo");
   }
+  
+
 }
 
 void setup() {
