@@ -53,14 +53,19 @@ void OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
 
     createDir(SD,"/Datos");
     String fileName = String(myData.usuarioOrigen) + ".txt";
-    dataFile = SD.open(fileName, FILE_APPEND);
-    if (dataFile) {
-      dataFile.println(String(myData.operation) + "," + String(myData.usuarioOrigen) + "," + String(myData.usuarioDestino) + "," + String(myData.creditosTransferir));
-      dataFile.close();
-      Serial.println("Datos guardados en el archivo");
-  } else {
-    Serial.println("Error al abrir el archivo");
-  }
+    
+    if (SD.exists(fileName)){
+      dataFile = SD.open(fileName, FILE_APPEND);
+      if (dataFile) {
+        dataFile.print(String(myData.operation) + "," + String(myData.usuarioOrigen) + "," + String(myData.usuarioDestino) + "," + String(myData.creditosTransferir));
+        dataFile.close();
+        Serial.println("Datos guardados en el archivo");
+      } else {
+        Serial.println("Error al abrir el archivo");
+      }
+    }else{
+      Serial.print("El archivo no existe");
+    }
   
 
 }
