@@ -322,7 +322,7 @@ void showMenu() {
   Serial.println("Seleccione una opción:");
   Serial.println("1. Transferir créditos");
   Serial.println("2. Cargar créditos");
-  Serial.println("3. Consultar créditos")
+  Serial.println("3. Consultar créditos");
   Serial.println("4. Crear usuario");
 }
 
