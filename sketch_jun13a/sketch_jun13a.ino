@@ -51,31 +51,14 @@ char pass[7] = "123456"; // Declaracion de variable que almacena el password
 char ingresaPass[7];     // Variable que almacena la clave ingresada
 int indice = 0; //Variable que define el numero de letra que se va ingresando
 
-// Leds
-int pinLedVerde = 12;
-int pinLedRojo = 13;
-//
-
 // Estructura para almacenar los datos de una tarjeta
 struct Tarjeta {
   int usuario;
   int balance;
-  int contrasena;
 };
-
 
 Tarjeta usuarios[100];
 int numUsuarios = 0;
-
-const int MAX_TARJETAS = 10;
-Tarjeta tarjetas[MAX_TARJETAS]; // Arreglo de estructuras para almacenar las tarjetas
-int numTarjetas = 0;
-
-
-
-
-
-
 
 
 
@@ -86,14 +69,9 @@ void setup() {
   Serial.begin(115200);
   SPI.begin(); // Iniciar comunicación SPI
   rfid.PCD_Init(); // Iniciar el lector RFID
-  Serial.println("Parque de Diversiones");
+  Serial.println("Bienvenido al Parque de Diversiones!");
   Serial.println("Apoye su tarjeta");
   WiFi.mode(WIFI_STA);
-
-  // Leds
-  pinMode(pinLedVerde, OUTPUT);
-  pinMode(pinLedRojo, OUTPUT);
-  //
 
   // Codigo ESP-NOW
   if (esp_now_init() != ESP_OK) {
@@ -344,7 +322,8 @@ void showMenu() {
   Serial.println("Seleccione una opción:");
   Serial.println("1. Transferir créditos");
   Serial.println("2. Cargar créditos");
-  Serial.println("3. Consultar créditos");
+  Serial.println("3. Consultar créditos")
+  Serial.println("4. Crear usuario");
 }
 
 
@@ -370,14 +349,12 @@ void loop(){
   // Codigo RFID reconocimiento de tarjeta.
   if (rfid.PICC_IsNewCardPresent()) {
     if (rfid.PICC_ReadCardSerial()) {
-      Serial.print("UID: ");
-      for (byte i = 0; i < rfid.uid.size; i++) {
-        Serial.print(rfid.uid.uidByte[i] < 0x10 ? " 0" : " ");
-        Serial.print(rfid.uid.uidByte[i], HEX);
-      }
+      Serial.println("Seleccione una opción:");
+      Serial.println("1. Transferir créditos");
+      Serial.println("2. Cargar créditos");
+      Serial.println("3. Consultar créditos");
       Serial.println(); // Imprime un salto de línea
       rfid.PICC_HaltA(); // Resetea el módulo para estar disponible para nuevas lecturas.
-      
     }
   }
   delay(250);
