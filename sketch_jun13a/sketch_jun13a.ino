@@ -197,7 +197,7 @@ void transferirCreditos() {
     Serial.println("Usuario de origen no encontrado");
   }
 
-
+  myData.operation = 1;
   myData.usuarioOrigen = usuarioOrigen;
   myData.usuarioDestino = usuarioDestino;
   myData.creditosTransferir = creditosTransferir;
@@ -253,6 +253,10 @@ void cargarCreditos() {
         Serial.println(creditosTransferir);
     }
   }
+  myData.operation = 2;
+  myData.usuarioOrigen = usuario;
+  myData.usuarioDestino = 0;
+  myData.creditosTransferir = creditosTransferir;
 }
 
 
@@ -279,6 +283,11 @@ void consultarCreditos() {
   Serial.println(usuarios[usuarioOrigen].usuario);
   Serial.print("Saldo actual: ");
   Serial.println(usuarios[usuarioOrigen].balance);
+
+  myData.operation = 3;
+  myData.usuarioOrigen = usuarioOrigen;
+  myData.usuarioDestino = 0;
+  myData.creditosTransferir = 0;
 }
 
 void registrarUsuario() {
