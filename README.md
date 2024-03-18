@@ -1,2 +1,2 @@
-# Tecnicas-Digitales
+# Electronica Informatica
 Avance de nuestro proyecto.
