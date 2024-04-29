@@ -5,7 +5,7 @@
 */
 
 // #include <ESP8266WiFi.h> // Para el ESP8266
-/*
+
 #include <WiFi.h> // Para el ESP32
 WiFiClient WIFI_CLIENT;
 #include <PubSubClient.h>
@@ -77,4 +77,3 @@ delay(3000);
 Serial.println("Conectado a MQTT.");
 }
 
-*/

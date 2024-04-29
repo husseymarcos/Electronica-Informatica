@@ -4,6 +4,7 @@
 #include <map>
 #include <MFRC522.h>
 
+
 /* clases que tendríamos que revaluar:
 - Adafruit_NeoPixel
 - SPI
