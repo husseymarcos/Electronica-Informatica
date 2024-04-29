@@ -1,7 +1,7 @@
 const mqtt = require('mqtt');
 
 // Conexión al servidor MQTT
-const client = mqtt.connect('mqtt://52.23.254.208'); 
+const client = mqtt.connect('mqtt://52.23.254.208'); // A TENER EN CUENTA! - Este link se renueva cada vez que volves a iniciar el Server desde AWS.
 
 // Manejo de eventos de conexión
 client.on('connect', () => {
