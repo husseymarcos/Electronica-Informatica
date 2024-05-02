@@ -1,0 +1,27 @@
+/* index.css */
+
+
+  
+  .container {
+    /*background-color: linear-gradient(to bottom, red, orange); */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  
+  h1 {
+    color: #333;
+    text-align: center;
+  }
+  
+  p {
+    color: #666;
+    text-align: center;
+  }
+  
+  .library-image {
+    display: block;
+    margin: 20px auto;
+    width: 200px;
+  }
+  
