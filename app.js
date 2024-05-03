@@ -1,8 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { connectToMongoDB } = require('./mongodb');
-const connectToMQTT = require('./mqttLogic');
+const {connectToMQTT, publishToMQTT} = require('./mqttLogic');
 const bookRoutes = require('./routes/bookRoutes');
+
 
 const app = express();
 
@@ -33,3 +34,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor Express.js en funcionamiento en el puerto ${PORT}`);
 });
+
+
+// Publicar un mensaje en el tema 'topic/ejemplo'
+publishToMQTT('topic/ejemplo', 'Hola desde node.js');
