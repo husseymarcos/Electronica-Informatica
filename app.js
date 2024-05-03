@@ -38,3 +38,6 @@ app.listen(PORT, () => {
 
 // Publicar un mensaje en el tema 'topic/ejemplo'
 publishToMQTT('topic/ejemplo', 'Hola desde node.js');
+
+
+
