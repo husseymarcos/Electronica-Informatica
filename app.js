@@ -2,8 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { connectToMongoDB } = require('./mongodb');
 const {connectToMQTT, publishToMQTT} = require('./mqttLogic');
-const bookRoutes = require('./routes/bookRoutes');
-
+// const bookController = require('./controllers/bookController');
+// const bookService = require('./service/bookService');
+const Book = require('./models/bookModels');
 
 const app = express();
 
@@ -25,7 +26,8 @@ const mqttURL = process.env.MQTT_URL; // O la URL de tu servidor MQTT en la nube
 const mqttClient = connectToMQTT(mqttURL);
 
 // Rutas de la aplicación
-app.use("/books",bookRoutes);
+// app.use("/api/books",bookController);
+
 
 
 
@@ -37,7 +39,49 @@ app.listen(PORT, () => {
 
 
 // Publicar un mensaje en el tema 'topic/ejemplo'
-publishToMQTT('topic/ejemplo', 'Hola desde node.js');
+// publishToMQTT('topic/ejemplo', 'Hola desde node.js');
+
+// Lógica para realizar operaciones en la base de datos de mongodb
+
+// Add Book
+app.post('/api/books/publish', async(req, res) => {
+  try {
+    const { title, author, genre, year } = req.body;
+    const book = new Book({
+      title,
+      author,
+      genre,
+      year
+    });
+
+    const savedBook = await book.save();
+    res.status(201).json(savedBook);
+  } catch (error) {
+    res.status(500).json({ message: `Error al guardar en la base de datos: ${error.message}` });
+  }
+});
 
 
 
+// -----------------------------------------
+
+// Get Books
+app.get('/api/books/get-books', async(req, res) => {
+ 
+});
+
+
+// -----------------------------------------
+
+// Update Book
+app.put('/api/books/modify/:id', async (req, res) => {
+ 
+});
+
+// -----------------------------------------
+
+// Delete Book
+
+app.delete('/api/books/delete/:id', async (req, res) => {
+
+});

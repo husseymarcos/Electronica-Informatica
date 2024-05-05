@@ -3,7 +3,7 @@ const router = express.Router();
 const bookService = require('../service/bookService');
 
 
-router.post('/api/books/publish', async (req, res) => {
+router.post('/publish', async (req, res) => {
     const { title, author, genre, year } = req.body;
     try {
         const savedBook = await bookService.createBook(title, author, genre, year);
@@ -13,7 +13,7 @@ router.post('/api/books/publish', async (req, res) => {
     }
 });
 
-router.get('/api/books/get-books', async (req, res) => {
+router.get('/get-books', async (req, res) => {
     try {
         const books = await bookService.getAllBooks();
         res.json(books);
@@ -22,7 +22,7 @@ router.get('/api/books/get-books', async (req, res) => {
     }
 });
 
-router.put('/api/books/modify/:id', async (req, res) => {
+router.put('/modify/:id', async (req, res) => {
     const { id } = req.params;
     const updatedBookData = req.body;
     try {
@@ -33,7 +33,7 @@ router.put('/api/books/modify/:id', async (req, res) => {
     }
 });
 
-router.delete('/api/books/delete/:id', async (req, res) => {
+router.delete('/delete/:id', async (req, res) => {
     const { id } = req.params;
     try {
         await bookService.deleteBook(id);
