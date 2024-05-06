@@ -1,18 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const bookService = require('../service/bookService');
+const Book = require('../models/bookModels');
 
-
-router.post('/publish', async (req, res) => {
-    const { title, author, genre, year } = req.body;
+router.post('/api/books/publish', async (req, res) => {
     try {
-        const savedBook = await bookService.createBook(title, author, genre, year);
+        const { title, author, genre, year } = req.body;
+        const book = new Book({
+          title,
+          author,
+          genre,
+          year
+        });
+    
+        const savedBook = await book.save();
         res.status(201).json(savedBook);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+      } catch (error) {
+        res.status(500).json({ message: `Error al guardar en la base de datos: ${error.message}` });
+      }
 });
 
+/*
 router.get('/get-books', async (req, res) => {
     try {
         const books = await bookService.getAllBooks();
@@ -42,5 +50,6 @@ router.delete('/delete/:id', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+*/
 
 module.exports = router;

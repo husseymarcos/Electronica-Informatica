@@ -2,9 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { connectToMongoDB } = require('./mongodb');
 const {connectToMQTT, publishToMQTT} = require('./mqttLogic');
-// const bookController = require('./controllers/bookController');
+const bookController = require('./controllers/bookController');
 // const bookService = require('./service/bookService');
-const Book = require('./models/bookModels');
+// const Book = require('./models/bookModels');
 
 const app = express();
 
@@ -26,13 +26,13 @@ const mqttURL = process.env.MQTT_URL; // O la URL de tu servidor MQTT en la nube
 const mqttClient = connectToMQTT(mqttURL);
 
 // Rutas de la aplicación
-// app.use("/api/books",bookController);
+app.use("/api/books",bookController);
 
 
 
 
 // Iniciar el servidor
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5500;
 app.listen(PORT, () => {
   console.log(`Servidor Express.js en funcionamiento en el puerto ${PORT}`);
 });
@@ -44,7 +44,7 @@ app.listen(PORT, () => {
 // Lógica para realizar operaciones en la base de datos de mongodb
 
 // Add Book
-app.post('/api/books/publish', async(req, res) => {
+/*app.post('/api/books/publish', async(req, res) => {
   try {
     const { title, author, genre, year } = req.body;
     const book = new Book({
@@ -85,3 +85,4 @@ app.put('/api/books/modify/:id', async (req, res) => {
 app.delete('/api/books/delete/:id', async (req, res) => {
 
 });
+*/

@@ -9,11 +9,11 @@ function connectToMQTT(mqttURL) {
     mqttClient.on('connect', () => {
         console.log('Conectado al servidor MQTT');
         // Suscribirse a los temas necesarios aquí
-        mqttClient.subscribe('topic/ejemplo', (err) => {
+        mqttClient.subscribe('/api/books', (err) => {
             if (err) {
               console.error('Error al suscribirse:', err);
             } else {
-              console.log('Suscripción exitosa a topic/ejemplo');
+              console.log('Suscripción exitosa a /api/books');
             }
         });
     
