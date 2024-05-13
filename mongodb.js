@@ -9,7 +9,8 @@ async function connectToMongoDB(mongoURI) {
         console.error('Error al conectar a MongoDB:', error);
     }
 }
-
+// TENES QUE REALIZAR UN INSERT acá para poder definir que agregue el libro que estoy creando. Código de Fernando
+// mongodb-nodejs.
 // Exporta la función para conectar a MongoDB
 module.exports = {
     connectToMongoDB
