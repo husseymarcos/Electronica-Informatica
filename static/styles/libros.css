@@ -6,7 +6,7 @@ body {
 }
 
 header {
-  background-color: #007bff; /* Color de fondo azul */
+  background-color: #1a1a1a; /* Color de fondo azul */
   color: #fff; /* Color del texto blanco */
   padding: 20px 0;
   text-align: center;
@@ -20,9 +20,34 @@ header {
   border-radius: 8px; /* Bordes redondeados */
 }
 
-h1, h2 {
+nav{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+nav ul{
+  display: flex;
+  list-style-type: none;
+  padding: 0;
+}
+
+nav li{
+  margin-right: 20px;
+}
+
+nav a{
+  text-decoration: none;
+  color: #fff;
+}
+
+h1{
   margin: 0;
-  color: #ffffff; 
+  color: #fff;
+}
+h2 {
+  margin: 0;
+  color: #1a1a1a; 
 }
 
 p {
@@ -31,6 +56,11 @@ p {
 }
 
 /* Estilos adicionales para el botón de Agregar Libro */
+
+.container a {
+  text-decoration: none;
+}
+
 .container a button {
   display: block;
   width: 100%;
@@ -44,7 +74,6 @@ p {
   border-radius: 5px;
   cursor: pointer;
   text-align: center;
-  text-decoration: none;
 }
 
 .container a button:hover {

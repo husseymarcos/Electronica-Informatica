@@ -21,24 +21,27 @@
     <nav>
       <ul>
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="books.html">Libros</a></li>
+        <li><a href="libros.html">Libros</a></li>
       </ul>
     </nav>
   </header>
 
   <div class="container">
-    <h2>Agregar Libro</h2>
+    <h2>
+      Agregar Libro
+      <div class="pulse-circle"></div>
+    </h2>
     <form id="add-book-form-fields">
-      <label for="title">Título:</label>
+      <label for="title">Título</label>
       <input type="text" id="title" name="title" required>
 
-      <label for="author">Autor:</label>
+      <label for="author">Autor</label>
       <input type="text" id="author" name="author" required>
 
-      <label for="genre">Género:</label>
+      <label for="genre">Género</label>
       <input type="text" id="genre" name="genre">
 
-      <label for="year">Año:</label>
+      <label for="year">Año</label>
       <input type="text" id="year" name="year">
 
       <div id="error-message"></div>
