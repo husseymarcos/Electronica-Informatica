@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bookService = require('../service/bookService');
-const Book = require('../models/bookModels');
+const Book = require('../bookModels');
 
 router.post('/api/books/publish', async (req, res) => {
     try {

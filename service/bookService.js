@@ -1,4 +1,4 @@
-const Book = require('../models/bookModels');
+const Book = require('../bookModels');
 
 exports.createBook = async (title, author, genre, year) => {
     const newBook = new Book({
