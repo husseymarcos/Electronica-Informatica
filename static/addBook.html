@@ -5,13 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agregar Libro - LibrosExpress</title>
   <link rel="stylesheet" href="styles/addBook.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   
   <script src="./js/addBook.js"></script>
 
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <h1>Agregar Libro - LibrosExpress</h1>
+    <h1>Libros Express</h1>
     <nav>
       <ul>
         <li><a href="index.html">Inicio</a></li>
@@ -24,19 +30,19 @@
     <h2>Agregar Libro</h2>
     <form id="add-book-form-fields">
       <label for="title">Título:</label>
-      <input type="text" id="title" name="title" required><br>
+      <input type="text" id="title" name="title" required>
 
       <label for="author">Autor:</label>
-      <input type="text" id="author" name="author" required><br>
+      <input type="text" id="author" name="author" required>
 
       <label for="genre">Género:</label>
-      <input type="text" id="genre" name="genre"><br>
+      <input type="text" id="genre" name="genre">
 
       <label for="year">Año:</label>
-      <input type="text" id="year" name="year"><br>
+      <input type="text" id="year" name="year">
 
-      <div id="error-message" style="display: none; color: red;"></div>
-      <div id="success-message" style="display: none; color: green;"></div>
+      <div id="error-message"></div>
+      <div id="success-message"></div>
 
       <button type="submit" onclick="addBook()">Agregar</button>
     </form>
