@@ -31,3 +31,22 @@ async function run() {
 }
 // Run the function and handle any errors
 run().catch(console.dir);
+
+
+const mqtt = require("mqtt");
+
+var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port;
+const mqttClient = mqtt.connect(mqttUri);
+
+mqttClient.on("connect", () => {
+  mqttClient.subscribe("+", (err) => {
+    if (!err) {
+     console.log("Client connected");
+    }
+  });
+});
+
+mqttClient.on("message", (topic, message) => {
+  // message is Buffer
+  console.log(message.toString());
+});
