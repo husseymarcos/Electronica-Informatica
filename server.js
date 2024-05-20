@@ -73,7 +73,7 @@ function connectToMQTT(mqttURL) {
         console.log('Mensaje recibido:', message.toString(), 'en el topic', topic);
         
         // Lógica para manejar los msj recibidos
-        if(topic == '/api/books'){
+        if(topic == 'api/books'){
             try{
                 const bookData = JSON.parse(message.toString());
                 const database = client.db(process.env.MONGO_DB_NAME);
@@ -113,7 +113,7 @@ app.post('/api/books/publish', async(req, res) => {
 
 
 // Iniciar el servidor
-const PORT = process.env.PORT || 5500;
+const PORT = process.env.PORT || 27017;
 app.listen(PORT, () => {
     console.log(`Servidor Express.js en funcionamiento en el puerto ${PORT}`);
 });
