@@ -7,6 +7,8 @@ var date_time = new Date();
 // Create a new client and connect to MongoDB
 const client = new MongoClient(mongoUri);
 
+
+
 async function run() {
   try {
     // Connect to the "insertDB" database and access its "haiku" collection
