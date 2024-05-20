@@ -1,8 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-// const { connectToMongoDB } = require('./mongodb');
 const {MongoClient} = require('mongodb');
 const Book = require('./bookModels');
+const path = require('path');
 
 // Lógica que tenes acá:
 /*Tenes la lógica de mqtt, y el bookController.*/ 
@@ -14,6 +14,17 @@ const app = express();
 
 // Middleware para analizar solicitudes JSON
 app.use(bodyParser.json());
+
+// Habilitar CORS
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+  });
+  
+// Servir archivos estáticos
+app.use(express.static(path.join(__dirname, 'public')));
 
 
 // Conexión a MongoDB en la nube
@@ -35,6 +46,11 @@ connectToMongoDB();
 
 
 // MQTT Logic
+
+// Conexión a MQTT 
+const mqttURL = process.env.MQTT_URL;
+const mqtt = require('mqtt');
+connectToMQTT(mqttURL);
 
 // Función para conectar al servidor MQTT
 function connectToMQTT(mqttURL) {
@@ -76,10 +92,6 @@ function connectToMQTT(mqttURL) {
     return mqttClient;
 }
 
-// Conexión a MQTT
-const mqttURL = process.env.MQTT_URL;
-const mqtt = require('mqtt');
-connectToMQTT(mqttURL);
 
 
 
@@ -89,6 +101,7 @@ app.post('/api/books/publish', async(req, res) => {
     try {
         const { title, author, genre, year } = req.body;
         const book = new Book({ title, author, genre, year});
+
         const database = client.db(process.env.MONGO_DB_NAME);
         const booksCollection = database.collection('books');
         const result = await booksCollection.insertOne(book);
