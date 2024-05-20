@@ -20,7 +20,7 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
-    res.header('Content-Security-Policy', "img src 'self'");
+    res.header('Content-Security-Policy', "default-src 'none'; img-src 'self' http://54.147.184.97:27017;");
     next();
   });
   
