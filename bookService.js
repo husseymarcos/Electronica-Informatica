@@ -1,4 +1,4 @@
-const Book = require('../bookModels');
+const Book = require('./bookModels');
 
 exports.createBook = async (title, author, genre, year) => {
     const newBook = new Book({
@@ -16,7 +16,7 @@ exports.createBook = async (title, author, genre, year) => {
     }
 };
 
-exports.getAllBooks = async () => {
+/*exports.getAllBooks = async () => {
     try {
         const books = await Book.find();
         return books;
@@ -49,4 +49,4 @@ exports.deleteBook = async (id) => {
     } catch (error) {
         throw new Error(error.message);
     }
-};
+}; */

@@ -23,21 +23,21 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
-    res.header('Content-Security-Policy', "default-src 'none'; img-src 'self' http://54.147.184.97:27017");
+    res.header('Content-Security-Policy', "default-src 'none'; img-src 'self' http://54.87.45.60:1883");
     next();
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'static')));
 
 // Conexión a MongoDB usando Mongoose
 const mongoURI = `mongodb://${config.mongodb.hostname}:${config.mongodb.port}/${config.mongodb.database}`;
 
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conexión a MongoDB establecida correctamente'))
-  .catch(error => console.error('Error al conectar a MongoDB:', error));
+  .catch(error => console.error('Error al conectaor a MongoDB:', error));
 
 // Lógica de MQTT
-const mqttURL = process.env.MQTT_URL;
+const mqttURL = `mqtt://${config.mqtt.hostname}:${config.mqtt.port}`;
 const mqtt = require('mqtt');
 
 function connectToMQTT(mqttURL) {
@@ -74,13 +74,10 @@ function connectToMQTT(mqttURL) {
 
 connectToMQTT(mqttURL);
 
+
 // Ruta para agregar libros
 app.post('/api/books/publish', async (req, res) => {
     try {
-
-        const database = client.db(config.mongodb.database);
-        const bookCollection = database.collection("books");
-
         const { title, author, genre, year } = req.body;
         const bookData = {
             title: title,
