@@ -44,7 +44,7 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
 
 // Conectar al broker MQTT y suscribirse a los tópicos -> Este escucha toda la información que se va ir publicando. Luego esa información la sube a la db
 mqttClient.on("connect", () => {
-  mqttClient.subscribe("+", (err) => {
+  mqttClient.subscribe("+", (err) => { // con el + indico que quiero que se suscriba a todos. Si en lugar de + especifico uno particular, evidentemente va a escuchar solo ese topic.
     if (!err) {
       console.log("Cliente conectado y suscrito a todos los tópicos");
     } else {
@@ -55,8 +55,11 @@ mqttClient.on("connect", () => {
 
 // Manejar los mensajes recibidos en los tópicos
 mqttClient.on("books", (topic, message) => {
-  const messageString = message.toString();
-  console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
+  if(topic === "library/books"){
+    const messageString = message.toString();
+    console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
+  }
+  console.log("Saca el topic === library/books, porque no está configurado anteriormente con el +")
 
   // Insertar el mensaje en la base de datos
   addBookToDB(messageString).catch(console.dir);
