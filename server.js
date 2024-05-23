@@ -5,7 +5,7 @@ var config = require('./config');
 
 // Configuración de MongoDB
 
-// mongodb://172.31.90.101/test
+// mongodb://172.31.90.101/library
 var mongoUri = 'mongodb://' + config.mongodb.hostname + ':' + config.mongodb.port + '/' + config.mongodb.database;
 
 // Configuración de MQTT

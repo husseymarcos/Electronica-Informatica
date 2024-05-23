@@ -11,6 +11,6 @@ config.mongodb = {};
 config.mongodb.hostname   = process.env.MONGODB_HOSTNAME   || '172.31.90.101'; // Private IP 
 config.mongodb.port       = process.env.MONGODB_PORT       || 27017;
 config.mongodb.database   = process.env.MONGODB_DATABASE   || 'library';
-config.mongodb.collection = process.env.MONGODB_COLLECTION || 'book-data';
+config.mongodb.collection = process.env.MONGODB_COLLECTION || 'book';
 
 module.exports = config;
