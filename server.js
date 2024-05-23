@@ -5,7 +5,7 @@ var config = require('./config');
 
 // Configuración de MongoDB
 
-// mongodb://172.31.90.101:27101/test
+// mongodb://172.31.90.101/test
 var mongoUri = 'mongodb://' + config.mongodb.hostname + ':' + config.mongodb.port + '/' + config.mongodb.database;
 
 // Configuración de MQTT
@@ -42,6 +42,9 @@ async function insertMessageToDB(message) {
   }
 }
 
+// Insertar el mensaje en la base de datos
+insertMessageToDB(messageString).catch(console.dir);
+
 // Conectar al broker MQTT y suscribirse a los tópicos
 mqttClient.on("connect", () => {
   mqttClient.subscribe("+", (err) => {
@@ -61,3 +64,4 @@ mqttClient.on("message", (topic, message) => {
   // Insertar el mensaje en la base de datos
   insertMessageToDB(messageString).catch(console.dir);
 });
+
