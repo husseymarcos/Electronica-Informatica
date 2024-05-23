@@ -58,10 +58,9 @@ mqttClient.on("message", (topic, message) => {
   if(topic === "library/books"){
     const messageString = message.toString();
     console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
+    // Insertar el mensaje en la base de datos
+    addBookToDB(messageString).catch(console.dir);
   }
   console.log("Saca el topic === library/books, porque no está configurado anteriormente con el +")
-
-  // Insertar el mensaje en la base de datos
-  addBookToDB(messageString).catch(console.dir);
 });
 
