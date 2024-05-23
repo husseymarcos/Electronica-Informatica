@@ -13,7 +13,7 @@ var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port;
 const mqttClient = mqtt.connect(mqttUri);
 
 // Función asíncrona para insertar un documento en MongoDB
-async function insertMessageToDB(message) {
+async function addBookToDB(message) { // Acá defino los datos que debe recibir la estructura del dato a agregar.
   // Crear un nuevo cliente y conectar a MongoDB
   const client = new MongoClient(mongoUri);
 
@@ -21,12 +21,11 @@ async function insertMessageToDB(message) {
     // Conectar a la base de datos especificada en la configuración
     await client.connect();
     const database = client.db(config.mongodb.database);
-    const collection = database.collection("message");
+    const collection = database.collection("book-data");
 
-    // Crear un documento para insertar
+    // Crear un documento para insertar - Acá especifico que tipo de formato de dato tiene que recibir cuando este escuchando. 
     const doc = {
-      fecha: new Date(),
-      content: message,
+      content: message // Este message engloba toda la información del formato json, es decir title, author, etc.
     };
 
     // Insertar el documento en la colección
@@ -43,7 +42,7 @@ async function insertMessageToDB(message) {
 }
 
 
-// Conectar al broker MQTT y suscribirse a los tópicos
+// Conectar al broker MQTT y suscribirse a los tópicos -> Este escucha toda la información que se va ir publicando. Luego esa información la sube a la db
 mqttClient.on("connect", () => {
   mqttClient.subscribe("+", (err) => {
     if (!err) {
@@ -60,6 +59,6 @@ mqttClient.on("message", (topic, message) => {
   console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
 
   // Insertar el mensaje en la base de datos
-  insertMessageToDB(messageString).catch(console.dir);
+  addBookToDB(messageString).catch(console.dir);
 });
 
