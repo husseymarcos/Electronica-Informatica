@@ -54,7 +54,7 @@ mqttClient.on("connect", () => {
 });
 
 // Manejar los mensajes recibidos en los tópicos
-mqttClient.on("message", (topic, message) => {
+mqttClient.on("books", (topic, message) => {
   const messageString = message.toString();
   console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
 
