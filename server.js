@@ -53,7 +53,7 @@ mqttClient.on("connect", () => {
   });
 });
 
-// Manejar los mensajes recibidos en los tópicos
+// Manejar los mensajes recibidos en los tópicos 
 mqttClient.on("message", (topic, message) => {
   if(topic === "library/books"){
     const messageString = message.toString();
@@ -61,6 +61,6 @@ mqttClient.on("message", (topic, message) => {
     // Insertar el mensaje en la base de datos
     addBookToDB(messageString).catch(console.dir);
   }
-  console.log("Saca el topic === library/books, porque no está configurado anteriormente con el +")
+  
 });
 
