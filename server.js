@@ -21,7 +21,7 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
     // Conectar a la base de datos especificada en la configuración
     await client.connect();
     const database = client.db(config.mongodb.database);
-    const collection = database.collection("book-data");
+    const collection = database.collection("book");
 
     // Crear un documento para insertar - Acá especifico que tipo de formato de dato tiene que recibir cuando este escuchando. 
     const doc = {
