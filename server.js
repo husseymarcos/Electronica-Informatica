@@ -42,8 +42,6 @@ async function insertMessageToDB(message) {
   }
 }
 
-// Insertar el mensaje en la base de datos
-insertMessageToDB(messageString).catch(console.dir);
 
 // Conectar al broker MQTT y suscribirse a los tópicos
 mqttClient.on("connect", () => {
