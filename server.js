@@ -13,7 +13,7 @@ var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port;
 const mqttClient = mqtt.connect(mqttUri);
 
 // Función asíncrona para insertar un documento en MongoDB
-async function addBookToDB(message) { // Acá defino los datos que debe recibir la estructura del dato a agregar.
+async function addBookToDB(message) { // Acá defino los datos que debe recibir la estructura del dato a agregar. Tiene que tener ese mismo formato
   // Crear un nuevo cliente y conectar a MongoDB
   const client = new MongoClient(mongoUri);
 
