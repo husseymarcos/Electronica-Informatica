@@ -8,6 +8,8 @@ var config = require('./config');
 // mongodb://172.31.90.101/library
 var mongoUri = 'mongodb://' + config.mongodb.hostname + ':' + config.mongodb.port + '/' + config.mongodb.database;
 
+
+// Para la página web: http://18.232.155.48:1883
 // Configuración de MQTT
 var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port;
 const mqttClient = mqtt.connect(mqttUri);
