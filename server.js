@@ -44,6 +44,33 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
 }
 
 
+// Función asíncrona para eliminar un libro de la DB
+async function deleteBookFromDB(bookToDelete){
+  const client = new MongoClient(mongoUri);
+
+  try{
+    await client.connect();
+    const database = client.db(config.mongodb.database);
+    const collection = database.collection("books");
+
+    const result = await collection.deleteOne(bookToDelete);
+
+    if(result.deletedCount > 0){
+      console.log(`Documento eliminado: ${JSON.stringify(bookToDelete)}`);
+    } else{
+      console.log(`No se encontró ningún documento que coincida con: ${JSON.stringify(bookToDelete)}`);
+    }
+  } catch (error){
+    console.error(`Error al eliminar el documento: `, error);
+  } finally{
+    await client.close();
+  }
+}
+
+
+
+
+
 // Conectar al broker MQTT y suscribirse a los tópicos -> Este escucha toda la información que se va ir publicando. Luego esa información la sube a la db
 mqttClient.on("connect", () => {
   mqttClient.subscribe("library/books", (err) => { // con el + indico que quiero que se suscriba a todos. Si en lugar de + especifico uno particular, evidentemente va a escuchar solo ese topic.
@@ -53,7 +80,19 @@ mqttClient.on("connect", () => {
       console.error("Error al suscribirse a los tópicos:", err);
     }
   });
+
+  mqttClient.subscribe("library/books/delete", (err) =>{
+    if(!err){
+      console.log("Cliente conectado y suscrito al tópico library/books/delete");
+    } else{
+      console.error("Error al suscribirse al tópico library/books/delete: ", err);
+    }
+
+  });
 });
+
+
+
 
 // Manejar los mensajes recibidos en los tópicos 
 mqttClient.on("message", (topic, message) => {
@@ -62,7 +101,20 @@ mqttClient.on("message", (topic, message) => {
     console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
     // Insertar el mensaje en la base de datos
     addBookToDB(messageString).catch(console.dir);
+  } else if(topic === "library/books/delete"){
+    const bookToDelete = JSON.parse(message.toString());
+    console.log(`Solicitud de eliminación recibida en el tópico ${topic}`);
+    deleteBookFromDB(bookToDelete).catch(console.dir);
   }
   
 });
 
+
+/*Si queres eliminar un archivo, por ejemplo, si queres hacerlo desde MQTT Explorer
+podes hacerlo sí:
+{
+  content.title = "El principito"
+}
+
+Te elimina el doc que tenga de title "El principito"
+*/ 
