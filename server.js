@@ -9,7 +9,6 @@ var config = require('./config');
 var mongoUri = 'mongodb://' + config.mongodb.hostname + ':' + config.mongodb.port + '/' + config.mongodb.database;
 
 
-// Para la página web: http://18.232.155.48:1883
 // Configuración de MQTT
 var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port;
 const mqttClient = mqtt.connect(mqttUri);
@@ -99,8 +98,8 @@ mqttClient.on("message", (topic, message) => {
   if(topic === "library/books"){
     const messageString = message.toString();
     console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
-    // Insertar el mensaje en la base de datos
     addBookToDB(messageString).catch(console.dir);
+    
   } else if(topic === "library/books/delete"){
     const bookToDelete = JSON.parse(message.toString());
     console.log(`Solicitud de eliminación recibida en el tópico ${topic}`);

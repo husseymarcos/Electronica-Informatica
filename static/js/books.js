@@ -20,7 +20,6 @@ function fetchAllBooks() {
                     <p>Author: ${book.author}</p>
                     <p>Genre: ${book.genre}</p>
                     <p>Year: ${book.year}</p>
-                    <button onclick="editBook('${book._id}')">Edit</button>
                     <button onclick="deleteBook('${book._id}')">Delete</button>
                 `;
                 booksList.appendChild(listItem);
@@ -58,10 +57,10 @@ function deleteBook(bookId) {
 }
 
 // Function to redirect to edit page for a book
-function editBook(bookId) {
+/*function editBook(bookId) {
     // Redirect to edit page with book ID in query parameter
     window.location.href = `editBook.html?id=${bookId}`;
-}
+}*/
 
 
 // Entry point when the page loads

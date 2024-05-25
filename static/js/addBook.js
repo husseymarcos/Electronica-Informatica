@@ -1,3 +1,6 @@
+/*Si llega a fallar, muy posiblemente sea por el manejo que tenemos por este lado
+Porque por la parte de backend, considero que está todo bien, pero veamos que ocurre!*/
+
 function addBook() {
 
     event.preventDefault();
