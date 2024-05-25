@@ -68,8 +68,6 @@ async function deleteBookFromDB(bookToDelete){
 
 
 
-console.log("No llego a la parte de mqtt y no sé por qué")
-
 // Conectar al broker MQTT y suscribirse a los tópicos -> Este escucha toda la información que se va ir publicando. Luego esa información la sube a la db
 mqttClient.on("connect", () => {
   mqttClient.subscribe("library/books", (err) => { // con el + indico que quiero que se suscriba a todos. Si en lugar de + especifico uno particular, evidentemente va a escuchar solo ese topic.
