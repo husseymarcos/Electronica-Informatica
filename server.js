@@ -52,7 +52,10 @@ async function deleteBookFromDB(bookToDelete){
     const database = client.db(config.mongodb.database);
     const collection = database.collection("books");
 
-    const result = await collection.deleteOne(bookToDelete);
+    const doc = {
+      content: bookToDelete
+    }
+    const result = await collection.deleteOne(doc);
 
     if(result.deletedCount > 0){
       console.log(`Documento eliminado: ${JSON.stringify(bookToDelete)}`);
