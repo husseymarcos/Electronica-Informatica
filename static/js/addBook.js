@@ -21,7 +21,7 @@ function addBook() {
         title: title,
         author: author,
         genre: genre,
-        year: year
+        year: parseInt(year)
     };
 
     fetch('/api/books/publish', {
@@ -56,3 +56,5 @@ function addBook() {
         document.getElementById('success-message').style.display = 'none';
     });
 }
+
+document.getElementById('add-book-form-fields').addEventListener('submit', addBook);
