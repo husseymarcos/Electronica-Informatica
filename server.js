@@ -68,7 +68,7 @@ async function deleteBookFromDB(bookToDelete){
 
 
 
-
+console.log("No llego a la parte de mqtt y no sé por qué")
 
 // Conectar al broker MQTT y suscribirse a los tópicos -> Este escucha toda la información que se va ir publicando. Luego esa información la sube a la db
 mqttClient.on("connect", () => {
@@ -99,7 +99,7 @@ mqttClient.on("message", (topic, message) => {
     const messageString = message.toString();
     console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
     addBookToDB(messageString).catch(console.dir);
-    
+
   } else if(topic === "library/books/delete"){
     const bookToDelete = JSON.parse(message.toString());
     console.log(`Solicitud de eliminación recibida en el tópico ${topic}`);
