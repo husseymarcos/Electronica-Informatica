@@ -13,10 +13,14 @@ var mongoUri = 'mongodb://' + config.mongodb.hostname + ':' + config.mongodb.por
 var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port;
 const mqttClient = mqtt.connect(mqttUri);
 
+// Crear un nuevo cliente y conectar a MongoDB
+const client = new MongoClient(mongoUri);
+
+
 // Función asíncrona para insertar un documento en MongoDB
 async function addBookToDB(message) { // Acá defino los datos que debe recibir la estructura del dato a agregar. Tiene que tener ese mismo formato
   // Crear un nuevo cliente y conectar a MongoDB
-  const client = new MongoClient(mongoUri);
+  // const client = new MongoClient(mongoUri);
 
   try {
     // Conectar a la base de datos especificada en la configuración
@@ -45,7 +49,7 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
 
 // Función asíncrona para eliminar un libro de la DB
 async function deleteBookFromDB(bookToDelete){ // Todo
-  const client = new MongoClient(mongoUri);
+  // const client = new MongoClient(mongoUri);
 
   try{
     await client.connect();
