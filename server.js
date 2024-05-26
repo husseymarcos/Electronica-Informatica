@@ -64,7 +64,9 @@ async function deleteBookFromDB(bookToDelete){ // Todo
     });
   } catch(error){
       console.error(`Error al eliminar el documento: `, error);
-  } 
+  } finally{
+    console.log("Hay algo que no está funcionando bien");
+  }
   /*  
     const database = client.db(config.mongodb.database);
     const collection = database.collection("books");
