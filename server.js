@@ -44,7 +44,7 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
 
 
 // Función asíncrona para eliminar un libro de la DB
-async function deleteBookFromDB(bookToDelete){
+async function deleteBookFromDB(bookToDelete){ // Todo
   const client = new MongoClient(mongoUri);
 
   try{
