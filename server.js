@@ -47,10 +47,27 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
 
 // Función asíncrona para eliminar un libro de la DB
 async function deleteBookFromDB(bookToDelete){ // Todo
-  const client = new MongoClient(mongoUri + '/delete');
+  const client = new MongoClient(mongoUri);
 
   try{
-    await client.connect();
+      client.connect(mongoUri, function(err){
+      if(err) throw err;
+      var database = client.db(config.mongodb.database);
+      var query = {
+        content: bookToDelete
+      }
+      database.collection("books").deleteOne(query, function(err, obj){
+        if(err) throw err;
+        console.log(`Documento eliminado: ${JSON.stringify(bookToDelete)}`);
+        client.close();
+      })
+    });
+  } catch(error){
+      console.error(`Error al eliminar el documento: `, error);
+  } finally{
+    client.close();
+  }
+  /*  
     const database = client.db(config.mongodb.database);
     const collection = database.collection("books");
 
@@ -68,8 +85,9 @@ async function deleteBookFromDB(bookToDelete){ // Todo
     console.error(`Error al eliminar el documento: `, error);
   } finally{
     await client.close();
-  }
+    */
 }
+
 
 
 
