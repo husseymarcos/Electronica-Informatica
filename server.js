@@ -59,7 +59,6 @@ async function deleteBookFromDB(bookToDelete){ // Todo
       database.collection("books").deleteOne(query, function(err, obj){
         if(err) throw err;
         console.log(`Documento eliminado: ${JSON.stringify(bookToDelete)}`);
-        client.close();
       })
     });
   } catch(error){
