@@ -50,7 +50,7 @@ async function deleteBookFromDB(bookToDelete){ // Todo
   // const client = new MongoClient(mongoUri);
 
   try{
-      await MongoClient.connect(mongoUri, function(err){
+      await MongoClient.connect(mongoUri, function(err, client){
       if(err) throw err;
       var database = client.db(config.mongodb.database);
       var query = {
@@ -59,13 +59,12 @@ async function deleteBookFromDB(bookToDelete){ // Todo
       database.collection("books").deleteOne(query, function(err, obj){
         if(err) throw err;
         console.log(`Documento eliminado: ${JSON.stringify(bookToDelete)}`);
+        client.close();
       })
     });
   } catch(error){
       console.error(`Error al eliminar el documento: `, error);
-  } finally{
-    await MongoClient.close();
-  }
+  } 
   /*  
     const database = client.db(config.mongodb.database);
     const collection = database.collection("books");
