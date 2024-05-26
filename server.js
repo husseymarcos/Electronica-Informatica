@@ -47,25 +47,26 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
 
 // Función asíncrona para eliminar un libro de la DB
 async function deleteBookFromDB(bookToDelete){ // Todo
-  // const client = new MongoClient(mongoUri);
+  const client = new MongoClient(mongoUri);
 
   try{
-      await MongoClient.connect(mongoUri, function(err, client){
-      if(err) throw err;
+      await client.connect(mongoUri)
       var database = client.db(config.mongodb.database);
-      var query = {
-        content: bookToDelete
-      }
-      database.collection("books").deleteOne(query, function(err, obj){
-        if(err) throw err;
+      var query = {content: bookToDelete}
+      
+      database.collection("books").deleteOne(query, function(err){
+        if(err) {
+          console.log(`No se encontró ningún documeto que coincida con: ${JSON.stringify(bookToDelete)}`);
+          throw err;
+        }
+
         console.log(`Documento eliminado: ${JSON.stringify(bookToDelete)}`);
         client.close();
-      })
-    });
-  } catch(error){
-      console.error(`Error al eliminar el documento: `, error);
-  } finally{
-    console.log("Hay algo que no está funcionando bien");
+      });
+    } catch(error){
+        console.error(`Error al eliminar el documento: `, error);
+    } finally{
+        console.log("Hay algo que no está funcionando bien");
   }
   /*  
     const database = client.db(config.mongodb.database);
