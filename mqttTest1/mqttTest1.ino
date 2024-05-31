@@ -11,8 +11,8 @@ WiFiClient WIFI_CLIENT;
 PubSubClient MQTT_CLIENT;
 
 // Nombre y contraseña de tu red WiFi.
-const char* ssid = "UA-Alumnos";
-const char* password = "41umn05WLC";
+const char* ssid = "Telecentro-40fe";
+const char* password = "898PHFSDBBL7";
 
 void setup() {
   Serial.begin(115200);
@@ -50,7 +50,7 @@ void loop() {
   aleatorioString.toCharArray(alea, 6);
 
   //                   Topic / valor
-  MQTT_CLIENT.publish("XJXT06/aleatorio", alea);
+  MQTT_CLIENT.publish("library/randomNumbers", alea);
 
   // Espera antes de Publicar otro aleatorio.
   delay(5000);
@@ -60,14 +60,14 @@ void loop() {
 // Reconecta con MQTT broker
 void reconnect() {
   // MQTT_CLIENT.setServer("192.168.1.206", 1883); // si uso un servidor local <ver IP correcta>
-  MQTT_CLIENT.setServer("broker.hivemq.com", 1883);  // servidor gratuito
+  MQTT_CLIENT.setServer("3.84.216.181", 1883);  // servidor gratuito
 
   MQTT_CLIENT.setClient(WIFI_CLIENT);
 
   // Intentando conectar con el broker.
   while (!MQTT_CLIENT.connected()) {
     Serial.println("Intentando conectar con MQTT.");
-    MQTT_CLIENT.connect("XJXT06"); // Escribe cualquier nombre.
+    MQTT_CLIENT.connect("library"); // Escribe cualquier nombre.
 
     // Espera antes de volver a intentarlo.
     delay(3000);
