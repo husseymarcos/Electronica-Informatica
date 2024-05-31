@@ -2,6 +2,7 @@
 const { MongoClient } = require('mongodb');
 const mqtt = require("mqtt");
 var config = require('./config');
+const { mongo, connect } = require('mongoose');
 
 // Configuración de MongoDB
 
@@ -14,17 +15,22 @@ var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port;
 const mqttClient = mqtt.connect(mqttUri);
 
 
+async function connectToMongoDB(){
+  const client = new MongoClient(mongoUri);
+  await client.connect();
+  return client;
+}
+
 
 // Función asíncrona para insertar un documento en MongoDB
 async function addBookToDB(message) { // Acá defino los datos que debe recibir la estructura del dato a agregar. Tiene que tener ese mismo formato
   // Crear un nuevo cliente y conectar a MongoDB
-  const client = new MongoClient(mongoUri);
+  const client = await connectToMongoDB();
 
   try {
     // Conectar a la base de datos especificada en la configuración
-    await client.connect();
     const database = client.db(config.mongodb.database);
-    const collection = database.collection("books");
+    const collection = database.collection(config.mongodb.bookCollection);
 
     // Crear un documento para insertar - Acá especifico que tipo de formato de dato tiene que recibir cuando este escuchando. 
     const doc = {
@@ -47,14 +53,13 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
 
 // Función asíncrona para eliminar un libro de la DB
 async function deleteBookFromDB(bookToDelete){ // Proba este método!
-  const client = new MongoClient(mongoUri);
+  const client = await connectToMongoDB();
 
   try{
-      await client.connect(mongoUri)
       var database = client.db(config.mongodb.database);
       var query = {content: bookToDelete}
       
-      database.collection("books").deleteOne(query, function(err){
+      database.collection("books").deleteOne(query, function(err){ // Tengo que eliminar de books. Me sirve de algo tener el topic books/delete? Considero que no, podemos el mismo books para eliminar datos desde allí!!
         if(err) {
           console.log(`No se encontró ningún documeto que coincida con: ${JSON.stringify(bookToDelete)}`);
           throw err;
@@ -89,6 +94,16 @@ async function deleteBookFromDB(bookToDelete){ // Proba este método!
     */
 }
 
+async function insertRandomNumber(number){
+  const client = await connectToMongoDB();
+  const database = client.db(config.mongodb.database);
+  const collection = database.collection(config.mongodb.randomNumberCollection);
+  collection.insertOne({number: number, timestamp: new Date()});
+  console.log(`Número insertado: ${number}`);
+  await client.close();
+}
+
+
 
 
 
@@ -102,11 +117,21 @@ mqttClient.on("connect", () => {
     }
   });
 
-  mqttClient.subscribe("library/books/delete", (err) =>{
+  mqttClient.subscribe("library/books/delete", (err) =>{ // Considero que el error está acá!
     if(!err){
       console.log("Cliente conectado y suscrito al tópico library/books/delete");
     } else{
       console.error("Error al suscribirse al tópico library/books/delete: ", err);
+    }
+
+  });
+
+  // Test para ver si el código puede agregar números aleatorios al mongoDB
+  mqttClient.subscribe("library/randomNumbers", (err) =>{
+    if(!err){
+      console.log("Cliente conectado y suscrito al tópico library/randomNumbers");
+    } else{
+      console.error("Error al suscribirse al tópico library/randomNumbers: ", err);
     }
 
   });
@@ -122,12 +147,22 @@ mqttClient.on("message", (topic, message) => {
     console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
     addBookToDB(messageString).catch(console.dir);
 
-  } else if(topic === "library/books/delete"){
+  } else if(topic === "library/books/delete"){ // Esta parte, quizá es innecesaria, a nivel topic, pero el método debe estar. Fijate como podes identificar para agregar o eliminar un libro!
     const bookToDelete = JSON.parse(message.toString());
     console.log(`Solicitud de eliminación recibida en el tópico ${topic}`);
     deleteBookFromDB(bookToDelete).catch(console.dir);
   }
-  
+
+  if(topic === "library/randomNumbers"){
+    console.log(`Mensaje recibido en ${topic}: ${message.toString()}`);
+    const number = parseInt(message.toString(), 10); // no sé de que sirve
+    if(!isNaN(number)){
+      insertRandomNumber(number);
+    } else{
+      console.error('El mensaje recibido no es un número válido: ', message.toString());
+    }
+  }
+
 });
 
 
@@ -139,3 +174,5 @@ podes hacerlo sí:
 
 Te elimina el doc que tenga de title "El principito"
 */ 
+
+
