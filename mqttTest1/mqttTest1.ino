@@ -80,4 +80,5 @@ void reconnect() {
       // Espera 3 segundos antes de volver a intentar
       delay(3000);
     }
+  }
 }
