@@ -98,7 +98,9 @@ async function insertRandomNumber(number){
   const client = await connectToMongoDB();
   const database = client.db(config.mongodb.database);
   const collection = database.collection(config.mongodb.randomNumberCollection);
+
   collection.insertOne({number: number, timestamp: new Date()});
+  
   console.log(`Número insertado: ${number}`);
   await client.close();
 }

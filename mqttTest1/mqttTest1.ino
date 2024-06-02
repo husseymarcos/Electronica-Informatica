@@ -67,7 +67,7 @@ void reconnect() {
   // Intentando conectar con el broker.
   while (!MQTT_CLIENT.connected()) {
     Serial.println("Intentando conectar con MQTT.");
-    MQTT_CLIENT.connect("library"); // Escribe cualquier nombre.
+    MQTT_CLIENT.connect("mqtt://34.229.22.136:1883"); // Escribe cualquier nombre.
 
     // Espera antes de volver a intentarlo.
     delay(3000);
