@@ -60,7 +60,7 @@ void loop() {
 // Reconecta con MQTT broker
 void reconnect() {
   // MQTT_CLIENT.setServer("192.168.1.206", 1883); // si uso un servidor local <ver IP correcta>
-  MQTT_CLIENT.setServer("3.84.216.181", 1883);  // servidor gratuito
+  MQTT_CLIENT.setServer("34.229.22.136", 1883);  // ip publico de mi aws de mosquitto
 
   MQTT_CLIENT.setClient(WIFI_CLIENT);
 
