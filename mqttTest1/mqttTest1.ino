@@ -37,7 +37,6 @@ void setup() {
   Serial.println("IP: ");
   Serial.println(WiFi.localIP());
 
-  MQTT_CLIENT.setServer(mqtt_server, mqtt_port);
 }
 
 void loop() {
@@ -46,8 +45,6 @@ void loop() {
   if (!MQTT_CLIENT.connected()) {
     reconnect();
   }
-
-  MQTT_CLIENT.loop();
 
   // Publicar un mensaje. Publish.
   // Convierte el entero a char. DEBE ser char.
@@ -67,18 +64,19 @@ void loop() {
 
 // Reconecta con MQTT broker
 void reconnect() {
- // Loop hasta que esté conectado
-  while (!MQTT_CLIENT.connected()) {
-    Serial.print("Intentando conectar con MQTT...");
-    // Intenta conectarse al servidor MQTT
-    if (MQTT_CLIENT.connect("ESP32Client")) {
-      Serial.println("conectado");
-    } else {
-      Serial.print("falló, rc=");
-      Serial.print(MQTT_CLIENT.state());
-      Serial.println(" Intentando de nuevo en 3 segundos");
-      // Espera 3 segundos antes de volver a intentar
-      delay(3000);
-    }
+
+  MQTT_CLIENT.setServer(mqtt_server, mqtt_port);
+
+  MQTT_CLIENT.setClient(WIFI_CLIENT);
+
+  // Intentando conectar con el broker.
+  while(!MQTT_CLIENT.connected()){
+    Serial.println("Intentando conectar con MQTT.");
+    MQTT_CLIENT.connect("library");
+
+    // Espera antes de volver a intentarlo
+    delay(3000);
   }
+
+  Serial.println("Conectado a MQTT.");
 }
