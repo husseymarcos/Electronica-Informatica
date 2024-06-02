@@ -109,7 +109,6 @@ async function insertRandomNumber(number){
   } catch (error){
     console.error(`Error al eliminar el documento: `, error);
   } finally{
-    console.log("Hay algo que no está funcionando bien"); // A modo de prueba!
     await client.close();
   }
 }
