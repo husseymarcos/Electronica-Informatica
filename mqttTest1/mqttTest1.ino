@@ -14,6 +14,10 @@ PubSubClient MQTT_CLIENT;
 const char* ssid = "Telecentro-40fe";
 const char* password = "898PHFSDBBL7";
 
+// Dirección IP y puerto del broker MQTT en la nube
+const char* mqtt_server = "34.229.22.136";
+const int mqtt_port = 1883;
+
 void setup() {
   Serial.begin(115200);
   delay(10);
@@ -32,6 +36,8 @@ void setup() {
   Serial.println("WiFi conectado.");
   Serial.println("IP: ");
   Serial.println(WiFi.localIP());
+
+  MQTT_CLIENT.setServer(mqtt_server, mqtt_port);
 }
 
 void loop() {
@@ -40,6 +46,8 @@ void loop() {
   if (!MQTT_CLIENT.connected()) {
     reconnect();
   }
+
+  MQTT_CLIENT.loop();
 
   // Publicar un mensaje. Publish.
   // Convierte el entero a char. DEBE ser char.
@@ -59,19 +67,17 @@ void loop() {
 
 // Reconecta con MQTT broker
 void reconnect() {
-  // MQTT_CLIENT.setServer("192.168.1.206", 1883); // si uso un servidor local <ver IP correcta>
-  MQTT_CLIENT.setServer("34.229.22.136", 1883);  // ip publico de mi aws de mosquitto
-
-  MQTT_CLIENT.setClient(WIFI_CLIENT);
-
-  // Intentando conectar con el broker.
+ // Loop hasta que esté conectado
   while (!MQTT_CLIENT.connected()) {
-    Serial.println("Intentando conectar con MQTT.");
-    MQTT_CLIENT.connect("mqtt://34.229.22.136:1883"); // Escribe cualquier nombre.
-
-    // Espera antes de volver a intentarlo.
-    delay(3000);
-  }
-
-  Serial.println("Conectado a MQTT.");
+    Serial.print("Intentando conectar con MQTT...");
+    // Intenta conectarse al servidor MQTT
+    if (MQTT_CLIENT.connect("ESP32Client")) {
+      Serial.println("conectado");
+    } else {
+      Serial.print("falló, rc=");
+      Serial.print(MQTT_CLIENT.state());
+      Serial.println(" Intentando de nuevo en 3 segundos");
+      // Espera 3 segundos antes de volver a intentar
+      delay(3000);
+    }
 }
