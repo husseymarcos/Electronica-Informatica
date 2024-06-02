@@ -12,7 +12,7 @@ PubSubClient MQTT_CLIENT;
 
 // Nombre y contraseña de tu red WiFi.
 const char* ssid = "Telecentro-40fe";
-const char* password = "898PHFSDBBL7";
+const char* password = "898PHFSD88L7";
 
 // Dirección IP y puerto del broker MQTT en la nube
 const char* mqtt_server = "34.229.22.136";
