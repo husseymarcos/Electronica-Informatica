@@ -15,19 +15,14 @@ var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port;
 const mqttClient = mqtt.connect(mqttUri);
 
 
-async function connectToMongoDB(){
-  const client = new MongoClient(mongoUri);
-  await client.connect();
-  return client;
-}
-
 
 // Función asíncrona para insertar un documento en MongoDB
 async function addBookToDB(message) { // Acá defino los datos que debe recibir la estructura del dato a agregar. Tiene que tener ese mismo formato
   // Crear un nuevo cliente y conectar a MongoDB
-  const client = await connectToMongoDB();
+  const client = new MongoClient(mongoUri);
 
   try {
+    await client.connect();
     // Conectar a la base de datos especificada en la configuración
     const database = client.db(config.mongodb.database);
     const collection = database.collection(config.mongodb.bookCollection);
@@ -53,9 +48,10 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
 
 // Función asíncrona para eliminar un libro de la DB
 async function deleteBookFromDB(bookToDelete){ // Proba este método!
-  const client = await connectToMongoDB();
+  const client = new MongoClient(mongoUri);
 
   try{
+      await client.connect()
       var database = client.db(config.mongodb.database);
       var query = {content: bookToDelete}
       
@@ -95,14 +91,27 @@ async function deleteBookFromDB(bookToDelete){ // Proba este método!
 }
 
 async function insertRandomNumber(number){
-  const client = await connectToMongoDB();
-  const database = client.db(config.mongodb.database);
-  const collection = database.collection(config.mongodb.randomNumberCollection);
-
-  collection.insertOne({number: number, timestamp: new Date()});
+  const client = new MongoClient(mongoUri);
+  try{
+    await client.connect();
+    const database = client.db(config.mongodb.database);
+    const collection = database.collection(config.mongodb.randomNumberCollection);
   
-  console.log(`Número insertado: ${number}`);
-  await client.close();
+    const doc = {
+      number: number,
+      timestamp: new Date()
+    }
+    const result = await collection.insertOne(doc);
+
+    console.log(`Documento insertado con el _id: ${result.insertedId}`);
+    console.log(`Número insertado: ${number}`);
+
+  } catch (error){
+    console.error(`Error al eliminar el documento: `, error);
+  } finally{
+    console.log("Hay algo que no está funcionando bien"); // A modo de prueba!
+    await client.close();
+  }
 }
 
 
@@ -113,9 +122,9 @@ async function insertRandomNumber(number){
 mqttClient.on("connect", () => {
   mqttClient.subscribe("library/books", (err) => { // con el + indico que quiero que se suscriba a todos. Si en lugar de + especifico uno particular, evidentemente va a escuchar solo ese topic.
     if (!err) {
-      console.log("Cliente conectado y suscrito a todos los tópicos");
+      console.log("Cliente conectado y suscrito al tópico library/books");
     } else {
-      console.error("Error al suscribirse a los tópicos:", err);
+      console.error("Error al suscribirse al tópico library/books:", err);
     }
   });
 
