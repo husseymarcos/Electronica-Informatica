@@ -46,6 +46,34 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
 }
 
 
+// Agregar al usuario 
+async function addUserCardToDB(uuid) { // Acá defino los datos que debe recibir la estructura del dato a agregar. Tiene que tener ese mismo formato
+  // Crear un nuevo cliente y conectar a MongoDB
+  const client = new MongoClient(mongoUri);
+
+  try {
+    await client.connect();
+    // Conectar a la base de datos especificada en la configuración
+    const database = client.db(config.mongodb.database);
+    const collection = database.collection(config.mongodb.usersRegisterCollection);
+
+    // Crear un documento para insertar - Acá especifico que tipo de formato de dato tiene que recibir cuando este escuchando. 
+    const doc = {
+      uuid: uuid // Este message engloba toda la información del formato json, uuid.
+    };
+
+    // Insertar el documento en la colección
+    const result = await collection.insertOne(doc);
+
+    // Imprimir el ID del documento insertado
+    console.log(`Documento insertado con el _id: ${result.insertedId}`);
+  } catch (error) {
+    console.error("Error al insertar el documento:", error);
+  } finally {
+    // Cerrar la conexión del cliente de MongoDB
+    await client.close();
+  }
+}
 
 
 
@@ -77,6 +105,14 @@ mqttClient.on("connect", () => {
     }
   });
 
+  mqttClient.subscribe("library/registerUsers", (err) =>{
+    if (!err) {
+      console.log("Connected and subscribed to topic library/registerUsers");
+    } else {
+      console.error("Error subscribing to topic library/registerUsers:", err);
+    }
+  })
+
   mqttClient.subscribe("library/usersVerification", (err) => {
       if (!err) {
         console.log("Connected and subscribed to topic library/usersVerification");
@@ -98,13 +134,25 @@ mqttClient.on("message", (topic, message) => {
     console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
     addBookToDB(messageString).catch(console.dir);
 
-  } else if (topic === "library/usersVerification") {
+  } 
+
+  // Registra al usuario 
+  if(topic === "library/registerUsers"){
+    console.log(`Received message on topic ${topic}: ${message}`);
+    const uuid = message.toString();
+    console.log(`Mensaje recibido en el tópico ${topic}: ${uuid}`);
+    addUserCardToDB(uuid).catch(console.dir);
+  }
+  
+  // Verifica el estado del usuario
+  if (topic === "library/usersVerification") {
     console.log(`Received message on topic ${topic}: ${message}`);
     const uuid = message.toString();
     const isAuthorized = verifyCard(uuid);
     mqttClient.publish("library/usersVerification", isAuthorized ? "authorized" : "unauthorized");
     console.log(`Card with UUID ${uuid} is ${isAuthorized ? "authorized" : "unauthorized"}`);
   }
+  
 });
 
 

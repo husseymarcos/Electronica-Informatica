@@ -13,7 +13,7 @@ config.mongodb.port       = process.env.MONGODB_PORT       || 27017;
 config.mongodb.database   = process.env.MONGODB_DATABASE   || 'library';
 config.mongodb.bookCollection = process.env.MONGODB_COLLECTION || 'books';
 config.mongodb.usersCollection = process.env.MONGODB_USERS_COLLECTION ||'usersVerification'; 
-
+config.mongodb.usersRegisterCollection = process.env.MONGODB_USERS_REGISTER_COLLECTION || 'registerUsers'; 
 
 
 
