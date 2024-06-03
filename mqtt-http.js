@@ -41,11 +41,18 @@ app.post('/api/books/publish', (req, res) => {
 
 
 // Ruta para realizar la verificación del Login
-
-
-// Chequealo, trata de hacerlo parecido a lo que tenías antes.
 app.post('/api/rfid/verification', async (req, res) => { // TODO
   const { uuid } = req.body;
+
+  // Escucha si se apoyó una tarjeta
+  mqttClient.subscribe('library/usersVerification', JSON.stringify(uuid), (err) =>{
+    if(err){
+      console.error("Error al suscribir en MQTT", err);
+      res.status(500).send("Error al recibir los datos de la tarjeta");
+    } else{
+      res.status(200).send("Tarjeta recibida exitosamente");
+    }
+  });
 
   if(!uuid){
     return res.status(400).json({status: 'failure', message: 'UUID is required'});
@@ -62,6 +69,13 @@ app.post('/api/rfid/verification', async (req, res) => { // TODO
   }
 });
 
+
+// Hacer que el http escuche a una variable que cambia. Eso es cuando se agrega una tarjeta.
+// Si cambia el estado de esa variable, el http permite llevar al login.html
+
+// Tengo esp32, publicando en el topic. library/usersVerification
+// El mqtt tiene que escuchar en ese topic para ver si se apoyó una tarjeta.
+// Una vez que ese estado cambia, lleva a cambiar el estado del http, y me lleva al login.html. 
 
 function checkAuth(req, res, next) {
   if (req.session.isAuthenticated) {
