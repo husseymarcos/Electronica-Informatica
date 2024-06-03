@@ -40,8 +40,8 @@ app.post('/api/books/publish', (req, res) => {
 
 
 
-// Iniciar el servidor en el puerto 5500
-const PORT = 5500;
+// Iniciar el servidor en el puerto 80
+const PORT = 80;
 app.listen(PORT, () => {
   console.log(`Servidor HTTP escuchando en el puerto ${PORT}`);
 });
