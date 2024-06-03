@@ -80,8 +80,13 @@ void loop() {
 
     char uuidCharArray[8];
     uuid.toCharArray(uuidCharArray, 8);
-    MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
+    //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
 
+
+    // Topic with the result of the query with the current card.
+    //MQTT_CLIENT.subscribe("library/usersVerification"); 
+
+    MQTT_CLIENT.publish("library/usersVerification", uuidCharArray);
 
     mfrc522.PICC_HaltA(); // Detenemos la comunicación con la tarjeta RFID
     mfrc522.PCD_StopCrypto1(); // Detenemos la encriptación
