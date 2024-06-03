@@ -47,25 +47,32 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
 
 
 
-async function insertRandomNumber(number){
+// un metodo que haga un fetch de los books
+// Función asíncrona para dar todos los documento en MongoDB
+async function fetchAllBooks(message) { // Acá defino los datos que debe recibir la estructura del dato a agregar. Tiene que tener ese mismo formato
+  // Crear un nuevo cliente y conectar a MongoDB
   const client = new MongoClient(mongoUri);
-  try{
+
+  try {
     await client.connect();
+    // Conectar a la base de datos especificada en la configuración
     const database = client.db(config.mongodb.database);
-    const collection = database.collection(config.mongodb.randomNumberCollection);
-  
+    const collection = database.collection(config.mongodb.bookCollection);
+
+    // Crear un documento para insertar - Acá especifico que tipo de formato de dato tiene que recibir cuando este escuchando. 
     const doc = {
-      number: number,
-      timestamp: new Date()
-    }
+      content: message // Este message engloba toda la información del formato json, es decir title, author, etc.
+    };
+
+    // Insertar el documento en la colección
     const result = await collection.insertOne(doc);
 
+    // Imprimir el ID del documento insertado
     console.log(`Documento insertado con el _id: ${result.insertedId}`);
-    console.log(`Número insertado: ${number}`);
-
-  } catch (error){
-    console.error(`Error al eliminar el documento: `, error);
-  } finally{
+  } catch (error) {
+    console.error("Error al insertar el documento:", error);
+  } finally {
+    // Cerrar la conexión del cliente de MongoDB
     await client.close();
   }
 }
