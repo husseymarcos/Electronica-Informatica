@@ -46,49 +46,6 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
 }
 
 
-// Función asíncrona para eliminar un libro de la DB
-async function deleteBookFromDB(bookToDelete){ // Proba este método!
-  const client = new MongoClient(mongoUri);
-
-  try{
-      await client.connect()
-      var database = client.db(config.mongodb.database);
-      var query = {content: bookToDelete}
-      
-      database.collection("books").deleteOne(query, function(err){ // Tengo que eliminar de books. Me sirve de algo tener el topic books/delete? Considero que no, podemos el mismo books para eliminar datos desde allí!!
-        if(err) {
-          console.log(`No se encontró ningún documeto que coincida con: ${JSON.stringify(bookToDelete)}`);
-          throw err;
-        }
-
-        console.log(`Documento eliminado: ${JSON.stringify(bookToDelete)}`);
-        client.close();
-      });
-    } catch(error){
-        console.error(`Error al eliminar el documento: `, error);
-    } finally{
-        console.log("Hay algo que no está funcionando bien");
-  }
-  /*  
-    const database = client.db(config.mongodb.database);
-    const collection = database.collection("books");
-
-    const doc = {
-      content: bookToDelete
-    }
-    const result = await collection.deleteOne(doc);
-
-    if(result.deletedCount > 0){
-      console.log(`Documento eliminado: ${JSON.stringify(bookToDelete)}`);
-    } else{
-      console.log(`No se encontró ningún documento que coincida con: ${JSON.stringify(bookToDelete)}`);
-    }
-  } catch (error){
-    console.error(`Error al eliminar el documento: `, error);
-  } finally{
-    await client.close();
-    */
-}
 
 async function insertRandomNumber(number){
   const client = new MongoClient(mongoUri);

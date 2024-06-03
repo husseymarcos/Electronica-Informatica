@@ -38,20 +38,7 @@ app.post('/api/books/publish', (req, res) => {
   });
 });
 
-// Ruta para eliminar un libro
-app.delete('/api/books/delete/:id', (req, res) => {
-  const book = req.body;
-  
-  // Publicar la solicitud de eliminación en el tópico MQTT
-  mqttClient.publish('library/books/delete', JSON.stringify(book), (err) => {
-    if (err) {
-      console.error("Error al publicar en MQTT:", err);
-      res.status(500).send("Error al eliminar el libro.");
-    } else {
-      res.status(200).send("Solicitud de eliminación enviada exitosamente.");
-    }
-  });
-});
+
 
 // Iniciar el servidor en el puerto 5500
 const PORT = 5500;
