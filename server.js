@@ -128,7 +128,7 @@ mqttClient.on("connect", () => {
 
 
 // Manejar los mensajes recibidos en los tópicos 
-mqttClient.on("message", (topic, message) => {
+mqttClient.on("message", async (topic, message) => {
   if(topic === "library/books"){
     const messageString = message.toString();
     console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
@@ -148,12 +148,14 @@ mqttClient.on("message", (topic, message) => {
   if (topic === "library/usersVerification") {
     console.log(`Received message on topic ${topic}: ${message}`);
     const uuid = message.toString();
-    const isAuthorized = verifyCard(uuid);
-    mqttClient.publish("library/usersVerification", isAuthorized ? "authorized" : "unauthorized");
+    const isAuthorized = await verifyCard(uuid);
+    const responseTopic = `library/usersVerificationResponse/${uuid}`;
+    mqttClient.publish(responseTopic, isAuthorized ? "authorized" : "unauthorized");
     console.log(`Card with UUID ${uuid} is ${isAuthorized ? "authorized" : "unauthorized"}`);
   }
-  
 });
+
+  
 
 
 /*Si queres eliminar un archivo, por ejemplo, si queres hacerlo desde MQTT Explorer

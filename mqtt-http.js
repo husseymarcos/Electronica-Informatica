@@ -40,20 +40,25 @@ app.post('/api/books/publish', (req, res) => {
 });
 
 
-// Ruta para realizar la verificación del Login
-app.post('/api/rfid/verification', async (req, res) => { // TODO
+app.post('/api/rfid/verification', async (req, res) => {
   const { uuid } = req.body;
+  const responseTopic = `library/usersVerificationResponse/${uuid}`;
 
-  // Escucha si se apoyó una tarjeta
-  mqttClient.subscribe('library/usersVerification', JSON.stringify(uuid), (err) =>{
-    if(err){
-      console.error("Error al suscribir en MQTT", err);
-      res.status(500).send("Error al recibir los datos de la tarjeta");
-    } else{
-      res.json({ status: 'success', message: 'Tarjeta recibida exitosamente' });
+  mqttClient.publish('library/usersVerification', uuid, (err) => {
+    if (err) {
+      console.error("Error al publicar en MQTT:", err);
+      res.status(500).send("Error al verificar la tarjeta.");
+    } else {
+      mqttClient.once('message', (topic, message) => {
+        if (topic === responseTopic) {
+          const status = message.toString();
+          res.json({ status: 'success', message: status });
+        }
+      });
     }
   });
 });
+
 
 
 // Hacer que el http escuche a una variable que cambia. Eso es cuando se agrega una tarjeta.
