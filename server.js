@@ -47,38 +47,24 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
 
 
 
-// un metodo que haga un fetch de los books
-// Función asíncrona para dar todos los documento en MongoDB
-async function fetchAllBooks(message) { // Acá defino los datos que debe recibir la estructura del dato a agregar. Tiene que tener ese mismo formato
-  // Crear un nuevo cliente y conectar a MongoDB
-  const client = new MongoClient(mongoUri);
 
+
+// Verificación de la tarjeta RFID
+async function verifyCard(uuid) {
+  const client = new MongoClient(mongoUri);
   try {
     await client.connect();
-    // Conectar a la base de datos especificada en la configuración
     const database = client.db(config.mongodb.database);
-    const collection = database.collection(config.mongodb.bookCollection);
-
-    // Crear un documento para insertar - Acá especifico que tipo de formato de dato tiene que recibir cuando este escuchando. 
-    const doc = {
-      content: message // Este message engloba toda la información del formato json, es decir title, author, etc.
-    };
-
-    // Insertar el documento en la colección
-    const result = await collection.insertOne(doc);
-
-    // Imprimir el ID del documento insertado
-    console.log(`Documento insertado con el _id: ${result.insertedId}`);
+    const collection = database.collection(config.mongodb.usersCollection);
+    const card = await collection.findOne({ uuid: uuid });
+    return card !== null;
   } catch (error) {
-    console.error("Error al insertar el documento:", error);
+    console.error("Error verifying card:", error);
+    return false;
   } finally {
-    // Cerrar la conexión del cliente de MongoDB
     await client.close();
   }
 }
-
-
-
 
 
 // Conectar al broker MQTT y suscribirse a los tópicos -> Este escucha toda la información que se va ir publicando. Luego esa información la sube a la db
@@ -91,24 +77,15 @@ mqttClient.on("connect", () => {
     }
   });
 
-  mqttClient.subscribe("library/books/delete", (err) =>{ // Considero que el error está acá!
-    if(!err){
-      console.log("Cliente conectado y suscrito al tópico library/books/delete");
-    } else{
-      console.error("Error al suscribirse al tópico library/books/delete: ", err);
-    }
-
+  mqttClient.subscribe("library/usersVerification", (err) => {
+      if (!err) {
+        console.log("Connected and subscribed to topic library/usersVerification");
+      } else {
+        console.error("Error subscribing to topic library/usersVerification:", err);
+      }
   });
 
-  // Test para ver si el código puede agregar números aleatorios al mongoDB
-  mqttClient.subscribe("library/randomNumbers", (err) =>{
-    if(!err){
-      console.log("Cliente conectado y suscrito al tópico library/randomNumbers");
-    } else{
-      console.error("Error al suscribirse al tópico library/randomNumbers: ", err);
-    }
-
-  });
+  
 });
 
 
@@ -121,22 +98,13 @@ mqttClient.on("message", (topic, message) => {
     console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
     addBookToDB(messageString).catch(console.dir);
 
-  } else if(topic === "library/books/delete"){ // Esta parte, quizá es innecesaria, a nivel topic, pero el método debe estar. Fijate como podes identificar para agregar o eliminar un libro!
-    const bookToDelete = JSON.parse(message.toString());
-    console.log(`Solicitud de eliminación recibida en el tópico ${topic}`);
-    deleteBookFromDB(bookToDelete).catch(console.dir);
+  } else if (topic === "library/usersVerification") {
+    console.log(`Received message on topic ${topic}: ${message}`);
+    const uuid = message.toString();
+    const isAuthorized = verifyCard(uuid);
+    mqttClient.publish("library/usersVerification", isAuthorized ? "authorized" : "unauthorized");
+    console.log(`Card with UUID ${uuid} is ${isAuthorized ? "authorized" : "unauthorized"}`);
   }
-
-  if(topic === "library/randomNumbers"){
-    console.log(`Mensaje recibido en ${topic}: ${message.toString()}`);
-    const number = parseInt(message.toString(), 10); // no sé de que sirve
-    if(!isNaN(number)){
-      insertRandomNumber(number);
-    } else{
-      console.error('El mensaje recibido no es un número válido: ', message.toString());
-    }
-  }
-
 });
 
 

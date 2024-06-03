@@ -3,28 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LibrosExpress</title>
+  <title>Login - LibrosExpress</title>
   <link rel="stylesheet" href="styles/index.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <header>
     <h1>Libros Express</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="libros.html">Libros</a></li>
-      </ul>
-    </nav>
   </header>
 
   <div class="container">
-    <p>En Libros Express encontrarás una amplia selección de libros para leer y disfrutar.</p>
-    <p>Utiliza nuestras herramientas de búsqueda y gestión para encontrar y administrar libros.</p>
-    <p>¡Comienza explorando nuestra colección ahora!</p>
+    <form id="loginForm">
+      <label for="uuid">RFID UUID:</label>
+      <input type="text" id="uuid" name="uuid" required>
+      <button type="submit">Login</button>
+    </form>
   </div>
 
-  <div class="background"></div>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const uuid = document.getElementById('uuid').value;
+      fetch('/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ uuid: uuid })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          window.location.href = 'index.html';
+        } else {
+          alert('Authorization failed');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+  </script>
 </body>
 </html>
-

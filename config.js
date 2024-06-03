@@ -12,7 +12,8 @@ config.mongodb.hostname   = process.env.MONGODB_HOSTNAME   || '172.31.90.101'; /
 config.mongodb.port       = process.env.MONGODB_PORT       || 27017;
 config.mongodb.database   = process.env.MONGODB_DATABASE   || 'library';
 config.mongodb.bookCollection = process.env.MONGODB_COLLECTION || 'books';
-config.mongodb.randomNumberCollection = process.env.MONGODB_RANDOM_NUMBER_COLLECTION || 'randomNumbers';
+config.mongodb.usersCollection = process.env.MONGODB_USERS_COLLECTION ||'usersVerification'; 
+
 
 
 

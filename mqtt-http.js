@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const mqtt = require("mqtt");
 const path = require('path');
 const config = require('./config');
+const { verifyCard } = require('./server'); // Importar la función verifyCard
 
 /*
 Este código básicamente permite publicar al mqtt que está escuchando.
@@ -38,6 +39,42 @@ app.post('/api/books/publish', (req, res) => {
   });
 });
 
+
+// Ruta para realizar la verificación del Login
+
+
+// Chequealo, trata de hacerlo parecido a lo que tenías antes.
+app.post('/api/rfid/verification', async (req, res) => { // TODO
+  const { uuid } = req.body;
+
+  if(!uuid){
+    return res.status(400).json({status: 'failure', message: 'UUID is required'});
+  }
+  try {
+    const isAuthorized = await verifyCard(uuid);
+    if (isAuthorized) {
+      res.json({ status: 'success', message: 'Card is authorized' });
+    } else {
+      res.json({ status: 'failure', message: 'Card is not authorized' });
+    }
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+
+function checkAuth(req, res, next) {
+  if (req.session.isAuthenticated) {
+    next();
+  } else {
+    res.redirect('/login.html');
+  }
+}
+
+
+app.get('/index.html', checkAuth, (req, res) => {
+  res.sendFile(__dirname + '/static/index.html');
+});
 
 
 // Iniciar el servidor en el puerto 80
