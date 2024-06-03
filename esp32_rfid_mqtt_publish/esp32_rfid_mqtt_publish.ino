@@ -78,8 +78,8 @@ void loop() {
     }
     Serial.println(uuid); // Imprimimos el UUID en el monitor serial
 
-    char uuidCharArray[32];
-    uuid.toCharArray(uuidCharArray, 32);
+    char uuidCharArray[8];
+    uuid.toCharArray(uuidCharArray, 8);
     MQTT_CLIENT.publish("XJXT06/aleatorio", uuidCharArray);
 
 
