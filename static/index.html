@@ -17,28 +17,25 @@
   </div>
 
   <script>
-    document.getElementById('loginForm').addEventListener('submit', function(event) {
-      event.preventDefault();
+    async function verifyCard() {
       const uuid = document.getElementById('uuid').value;
-      fetch('/verify', {
+      
+      const response = await fetch('/api/rfid/verification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ uuid: uuid })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === 'success') {
-          window.location.href = 'index.html';
-        } else {
-          alert('Authorization failed');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
+        body: JSON.stringify({ uuid })
       });
-    });
+      
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        window.location.href = '/login.html'; // Redirige a login.html
+      } else {
+        alert('Error: ' + result.message);
+      }
+    }
   </script>
 </body>
 </html>

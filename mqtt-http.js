@@ -50,23 +50,9 @@ app.post('/api/rfid/verification', async (req, res) => { // TODO
       console.error("Error al suscribir en MQTT", err);
       res.status(500).send("Error al recibir los datos de la tarjeta");
     } else{
-      res.status(200).send("Tarjeta recibida exitosamente");
+      res.json({ status: 'success', message: 'Tarjeta recibida exitosamente' });
     }
   });
-
-  if(!uuid){
-    return res.status(400).json({status: 'failure', message: 'UUID is required'});
-  }
-  try {
-    const isAuthorized = await verifyCard(uuid);
-    if (isAuthorized) {
-      res.json({ status: 'success', message: 'Card is authorized' });
-    } else {
-      res.json({ status: 'failure', message: 'Card is not authorized' });
-    }
-  } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
-  }
 });
 
 
