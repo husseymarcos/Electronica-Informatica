@@ -4,16 +4,7 @@ const mqtt = require("mqtt");
 const path = require('path');
 const config = require('./config');
 const { verifyCard } = require('./server'); // Importar la función verifyCard
-
-/*
-Este código básicamente permite publicar al mqtt que está escuchando.
-La idea es que de esta forma, el libro que agreguemos, desde la página web, como se maneja por http
-se publique en el mqtt que está escuchando en server.js, como sabemos, el código que está allí, maneja
-el agregado de datos al mongo db, por tanto, el msj que vamos a agregar ahora, alude a lo que mandemos
-desde nuestro http, por tanto el formato json que agreguemos desde nuestra página, directamente debería agregarse
-en nuestra db. Aqui está presente la relación entre suscribe y publish de mqtt. Básicamente, la clave está
-en identificar quien suscribe, y quien publica. 
-*/ 
+const WebSocket = require('ws');
 
 // Configuración de MQTT
 var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port; // Broker de MQTT
@@ -24,9 +15,22 @@ const app = express();
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'static')));
 
+// Crear servidor WebSocket
+const wss = new WebSocket.Server({ noServer: true });
 
 // Mapa para almacenar las promesas pendientes de verificación
 const pendingVerifications = new Map();
+
+// Suscribirse al tópico de respuesta cuando se conecta al servidor MQTT
+mqttClient.on('connect', () => {
+  mqttClient.subscribe('library/usersVerification/#', (err) => {
+    if (!err) {
+      console.log('Suscrito a library/usersVerification/#');
+    } else {
+      console.error('Error al suscribirse al tópico:', err);
+    }
+  });
+});
 
 // Ruta para agregar un libro
 app.post('/api/books/publish', (req, res) => {
@@ -45,100 +49,74 @@ app.post('/api/books/publish', (req, res) => {
 
 // Ruta para verificación del RFID
 app.post('/api/rfid/verification', async (req, res) => {
-  console.log("llegué a hacer algo en /api/rfid/verification")
+  console.log("llegué a hacer algo en /api/rfid/verification");
   const { uuid } = req.body;
   const responseTopic = `library/usersVerification/${uuid}`;
-
 
   const verificationPromise = new Promise((resolve, reject) => {
     pendingVerifications.set(responseTopic, { resolve, reject });
   });
 
   mqttClient.publish('library/usersVerification', uuid, (err) => {
-    console.log("Estoy ejecutando la publicación en el topic library/usersVerification")
+    console.log("Estoy ejecutando la publicación en el topic library/usersVerification");
     if (err) {
       console.error("Error al publicar en MQTT:", err);
       res.status(500).send("Error al verificar la tarjeta.");
       pendingVerifications.delete(responseTopic);
-    } 
-    
-    /*else {
-      mqttClient.once('message', (topic, message) => {
-        console.log("Llegué al mqttClient.once, vamos a ver que ocurre")
-        if (topic === responseTopic) {
-          const status = message.toString();
-          if (status === 'authorized') {
-            // Send response indicating success
-            res.json({ status: 'success', message: 'authorized' });
-            console.log("publique la res");
-          } else {
-            res.status(403).json({ status: 'error', message: 'unauthorized' });
-          }
-        }
-        console.log("Creo que no hice nada");
-      });
-    }*/
-
-    try {
-      const status = verificationPromise;
-      if (status === 'authorized') {
-        // Send response indicating success
-        res.json({ status: 'success', message: 'authorized' });
-        console.log("publique la res");
-      }
-      else{
-        console.log("no publique nada me rompí :(");
-        res.status(400).json({status: 'error', message: 'unautorized'});
-      }
-    } catch (error) {
-      res.status(500).send("Error al verificar la tarjeta.");
-    } finally {
-      pendingVerifications.delete(responseTopic);
     }
   });
+
+  try {
+    const status = await verificationPromise;
+    if (status === 'authorized') {
+      // Send response indicating success
+      res.json({ status: 'success', message: 'authorized' });
+      console.log("publique la res");
+    } else {
+      res.status(403).json({ status: 'error', message: 'unauthorized' });
+    }
+  } catch (error) {
+    res.status(500).send("Error al verificar la tarjeta.");
+  } finally {
+    pendingVerifications.delete(responseTopic);
+  }
 });
 
-
 // Manejar los mensajes recibidos en los tópicos de respuesta
-
-mqttClient.on('message', (topic, message) =>{
+mqttClient.on('message', (topic, message) => {
+  console.log(`Mensaje recibido en el tópico ${topic}: ${message}`);
   if (pendingVerifications.has(topic)) {
     const { resolve } = pendingVerifications.get(topic);
     resolve(message.toString());
     pendingVerifications.delete(topic);
     console.log(`Promesa resuelta para el tópico ${topic}`);
-  }
-  else{
+  } else {
     console.log(`No hay promesas pendientes para el tópico ${topic}`);
   }
+
+  // Enviar el mensaje recibido a todos los clientes WebSocket
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({ topic, message: message.toString() }));
+    }
+  });
 });
 
-// Hacer que el http escuche a una variable que cambia. Eso es cuando se agrega una tarjeta.
-// Si cambia el estado de esa variable, el http permite llevar al login.html
-
-// Tengo esp32, publicando en el topic. library/usersVerification
-// El mqtt tiene que escuchar en ese topic para ver si se apoyó una tarjeta.
-// Una vez que ese estado cambia, lleva a cambiar el estado del http, y me lleva al login.html. 
-
-function checkAuth(req, res, next) {
-  if (req.session.isAuthenticated) {
-    next();
-  } else {
-    res.redirect('/login.html');
-  }
-}
-
-
-app.get('/index.html', checkAuth, (req, res) => {
-  res.sendFile(__dirname + '/static/index.html');
+// Manejar las conexiones WebSocket
+wss.on('connection', ws => {
+  console.log('Nuevo cliente WebSocket conectado');
+  ws.on('message', message => {
+    console.log(`Mensaje recibido del cliente WebSocket: ${message}`);
+  });
 });
 
-
-// Iniciar el servidor en el puerto 80
-const PORT = 80;
-app.listen(PORT, () => {
-  console.log(`Servidor HTTP escuchando en el puerto ${PORT}`);
+// Iniciar el servidor en el puerto 80 y manejar las conexiones de WebSocket
+const server = app.listen(80, () => {
+  console.log(`Servidor HTTP escuchando en el puerto 80`);
 });
 
-
-
+server.on('upgrade', (request, socket, head) => {
+  wss.handleUpgrade(request, socket, head, ws => {
+    wss.emit('connection', ws, request);
+  });
+});

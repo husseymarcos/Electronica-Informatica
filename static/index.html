@@ -17,11 +17,33 @@
   </div>
 
   <script>
-  
-    async function verifyCard() {
-      const uuid = document.getElementById('uuid').value;
+    const ws = new WebSocket('ws://' + window.location.host);
 
-      console.log(uuid);
+    ws.onopen = () => {
+      console.log('Conectado al servidor WebSocket');
+    };
+
+    ws.onmessage = (event) => {
+      console.log('Mensaje recibido del servidor WebSocket:', event.data);
+      const data = JSON.parse(event.data);
+
+      if (data.topic.startsWith('library/usersVerification/')) {
+        // Extract UUID from the topic
+        const uuid = data.topic.split('/').pop();
+        verifyCard(uuid);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('Desconectado del servidor WebSocket');
+    };
+
+    ws.onerror = (error) => {
+      console.error('Error en la conexión WebSocket:', error);
+    };
+
+    async function verifyCard(uuid) {
+      console.log('Verificando tarjeta con UUID:', uuid);
 
       const response = await fetch('/api/rfid/verification', {
         method: 'POST',
@@ -36,15 +58,11 @@
       console.log(result);
 
       if (result.status === 'success' && result.message === 'authorized') {
-        // Reload the page upon successful authorization
-        // Si es así, redirige a login.html
         window.location.href = '/login.html';
-
       } else {
         alert('Error: ' + result.message);
       }
     }
-
   </script>
 </body>
 </html>
