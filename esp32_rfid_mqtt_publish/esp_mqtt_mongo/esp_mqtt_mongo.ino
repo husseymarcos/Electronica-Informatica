@@ -78,14 +78,15 @@ void loop() {
     }
     Serial.println(uuid); // Imprimimos el UUID en el monitor serial
 
-    char uuidCharArray[8];
-    uuid.toCharArray(uuidCharArray, 8);
+    char uuidCharArray[10];
+    uuid.toCharArray(uuidCharArray, 10);
     //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
 
 
     // Topic with the result of the query with the current card.
     //MQTT_CLIENT.subscribe("library/usersVerification"); 
 
+    //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
     MQTT_CLIENT.publish("library/usersVerification", uuidCharArray);
 
     mfrc522.PICC_HaltA(); // Detenemos la comunicación con la tarjeta RFID
@@ -98,7 +99,7 @@ void loop() {
 // Reconecta con MQTT broker
 void reconnect() {
   // MQTT_CLIENT.setServer("192.168.1.206", 1883); // si uso un servidor local <ver IP correcta>
-  MQTT_CLIENT.setServer("52.90.138.144", 1883);  // servidor gratuito
+  MQTT_CLIENT.setServer("18.208.174.249", 1883);  // servidor gratuito
 
   MQTT_CLIENT.setClient(WIFI_CLIENT);
 
