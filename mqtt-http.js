@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, 'static')));
 
 
 // Mapa para almacenar las promesas pendientes de verificación
-// const pendingVerifications = new Map();
+const pendingVerifications = new Map();
 
 // Ruta para agregar un libro
 app.post('/api/books/publish', (req, res) => {
@@ -49,12 +49,20 @@ app.post('/api/rfid/verification', async (req, res) => {
   const { uuid } = req.body;
   const responseTopic = `library/usersVerification/${uuid}`;
 
+
+  const verificationPromise = new Promise((resolve, reject) => {
+    pendingVerifications.set(responseTopic, { resolve, reject });
+  });
+
   mqttClient.publish('library/usersVerification', uuid, (err) => {
     console.log("Estoy ejecutando la publicación en el topic library/usersVerification")
     if (err) {
       console.error("Error al publicar en MQTT:", err);
       res.status(500).send("Error al verificar la tarjeta.");
-    } else {
+      pendingVerifications.delete(responseTopic);
+    } 
+    
+    /*else {
       mqttClient.once('message', (topic, message) => {
         console.log("Llegué al mqttClient.once, vamos a ver que ocurre")
         if (topic === responseTopic) {
@@ -69,6 +77,23 @@ app.post('/api/rfid/verification', async (req, res) => {
         }
         console.log("Creo que no hice nada");
       });
+    }*/
+
+    try {
+      const status = verificationPromise;
+      if (status === 'authorized') {
+        // Send response indicating success
+        res.json({ status: 'success', message: 'authorized' });
+        console.log("publique la res");
+      }
+      else{
+        console.log("no publique nada me rompí :(");
+        res.status(400).json({status: 'error', message: 'unautorized'});
+      }
+    } catch (error) {
+      res.status(500).send("Error al verificar la tarjeta.");
+    } finally {
+      pendingVerifications.delete(responseTopic);
     }
   });
 });
@@ -76,13 +101,17 @@ app.post('/api/rfid/verification', async (req, res) => {
 
 // Manejar los mensajes recibidos en los tópicos de respuesta
 
-/*mqttClient.on('message', (topic, message) =>{
+mqttClient.on('message', (topic, message) =>{
   if (pendingVerifications.has(topic)) {
     const { resolve } = pendingVerifications.get(topic);
     resolve(message.toString());
     pendingVerifications.delete(topic);
+    console.log(`Promesa resuelta para el tópico ${topic}`);
   }
-});*/
+  else{
+    console.log(`No hay promesas pendientes para el tópico ${topic}`);
+  }
+});
 
 // Hacer que el http escuche a una variable que cambia. Eso es cuando se agrega una tarjeta.
 // Si cambia el estado de esa variable, el http permite llevar al login.html
