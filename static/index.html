@@ -17,9 +17,10 @@
   </div>
 
   <script>
+  
     async function verifyCard() {
       const uuid = document.getElementById('uuid').value;
-      
+
       const response = await fetch('/api/rfid/verification', {
         method: 'POST',
         headers: {
@@ -27,15 +28,17 @@
         },
         body: JSON.stringify({ uuid })
       });
-      
+
       const result = await response.json();
-      
+
       if (result.status === 'success' && result.message === 'authorized') {
-        window.location.href = '/login.html'; // Redirige a login.html
+        // Reload the page upon successful authorization
+        location.reload();
       } else {
         alert('Error: ' + result.message);
       }
     }
+
   </script>
 </body>
 </html>

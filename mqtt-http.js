@@ -48,10 +48,6 @@ app.post('/api/rfid/verification', async (req, res) => {
   const { uuid } = req.body;
   const responseTopic = `library/usersVerification/${uuid}`;
 
-  /*const promise = new Promise((resolve, reject) =>{
-    pendingVerifications.set(responseTopic, {resolve, reject});
-  })*/
-
   mqttClient.publish('library/usersVerification', uuid, (err) => {
     if (err) {
       console.error("Error al publicar en MQTT:", err);
@@ -60,12 +56,18 @@ app.post('/api/rfid/verification', async (req, res) => {
       mqttClient.once('message', (topic, message) => {
         if (topic === responseTopic) {
           const status = message.toString();
-          res.json({ status: 'success', message: status });
+          if (status === 'authorized') {
+            // Send response indicating success
+            res.json({ status: 'success', message: 'authorized' });
+          } else {
+            res.status(403).json({ status: 'error', message: 'Unauthorized' });
+          }
         }
       });
     }
   });
 });
+
 
 // Manejar los mensajes recibidos en los tópicos de respuesta
 
