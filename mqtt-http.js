@@ -60,7 +60,7 @@ app.post('/api/rfid/verification', async (req, res) => {
             // Send response indicating success
             res.json({ status: 'success', message: 'authorized' });
           } else {
-            res.status(403).json({ status: 'error', message: 'Unauthorized' });
+            res.status(403).json({ status: 'error', message: 'unauthorized' });
           }
         }
       });
