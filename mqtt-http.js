@@ -45,24 +45,29 @@ app.post('/api/books/publish', (req, res) => {
 
 // Ruta para verificación del RFID
 app.post('/api/rfid/verification', async (req, res) => {
+  console.log("llegué a hacer algo en /api/rfid/verification")
   const { uuid } = req.body;
   const responseTopic = `library/usersVerification/${uuid}`;
 
   mqttClient.publish('library/usersVerification', uuid, (err) => {
+    console.log("Estoy ejecutando la publicación en el topic library/usersVerification")
     if (err) {
       console.error("Error al publicar en MQTT:", err);
       res.status(500).send("Error al verificar la tarjeta.");
     } else {
       mqttClient.once('message', (topic, message) => {
+        console.log("Llegué al mqttClient.once, vamos a ver que ocurre")
         if (topic === responseTopic) {
           const status = message.toString();
           if (status === 'authorized') {
             // Send response indicating success
             res.json({ status: 'success', message: 'authorized' });
+            console.log("publique la res");
           } else {
             res.status(403).json({ status: 'error', message: 'unauthorized' });
           }
         }
+        console.log("Creo que no hice nada");
       });
     }
   });
