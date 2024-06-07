@@ -83,9 +83,21 @@ async function verifyCard(uuid) {
   try {
     await client.connect();
     const database = client.db(config.mongodb.database);
-    const collection = database.collection(config.mongodb.usersRegisterCollection);
-    const card = await collection.findOne({ uuid: uuid });
-    return card !== null;
+    const collection = database.collection(config.mongodb.usersRegisterCollection); // Busca en la base de los usuarios registrados
+    const card = await collection.findOne({ uuid: uuid }); // Acá lo busca si lo encuentra.
+    const verificationCollections = database.collection(config.mongodb.usersCollection); // Creo que la colección de usuarios a verificar
+    
+    if(card != null){ // Si encuentra la carta, agrega eso, a la base de datos de usersCollection
+      const userData = {
+        uuid: uuid
+      }
+      await verificationCollections.insertOne(userData); // Agregamos esa data de registro a la de verificación. De esta forma aseguramos que todo usuario registrado esté autorizado.
+      const verifyUser = await verificationCollections.findOne(userData); // lo busca.
+      return verifyUser != null; // Si está true, en teoría está autorizado.
+    }
+    else{
+      return false; // el usuario no existe y por tanto la lógica no se hace
+    }
   } catch (error) {
     console.error("Error verifying card:", error);
     return false;

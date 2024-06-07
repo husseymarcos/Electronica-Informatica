@@ -46,13 +46,13 @@ app.post('/api/books/publish', (req, res) => {
 // Ruta para verificación del RFID
 app.post('/api/rfid/verification', async (req, res) => {
   const { uuid } = req.body;
-  const responseTopic = `library/registerUsers/${uuid}`;
+  const responseTopic = `library/usersVerification/${uuid}`;
 
   /*const promise = new Promise((resolve, reject) =>{
     pendingVerifications.set(responseTopic, {resolve, reject});
   })*/
 
-  mqttClient.publish('library/registerUsers', uuid, (err) => {
+  mqttClient.publish('library/usersVerification', uuid, (err) => {
     if (err) {
       console.error("Error al publicar en MQTT:", err);
       res.status(500).send("Error al verificar la tarjeta.");
