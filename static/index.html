@@ -33,7 +33,9 @@
 
       if (result.status === 'success' && result.message === 'authorized') {
         // Reload the page upon successful authorization
-        location.reload();
+        // Si es así, redirige a login.html
+        window.location.href = '/login.html';
+
       } else {
         alert('Error: ' + result.message);
       }
