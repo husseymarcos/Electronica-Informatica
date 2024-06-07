@@ -39,7 +39,7 @@ app.post('/api/books/publish', (req, res) => {
   });
 });
 
-
+// Ruta para verificación del RFID
 app.post('/api/rfid/verification', async (req, res) => {
   const { uuid } = req.body;
   const responseTopic = `library/usersVerification/${uuid}`;
