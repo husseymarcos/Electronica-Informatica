@@ -42,7 +42,7 @@ app.post('/api/books/publish', (req, res) => {
 
 app.post('/api/rfid/verification', async (req, res) => {
   const { uuid } = req.body;
-  const responseTopic = `library/usersVerificationResponse/${uuid}`;
+  const responseTopic = `library/usersVerification/${uuid}`;
 
   mqttClient.publish('library/usersVerification', uuid, (err) => {
     if (err) {

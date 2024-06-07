@@ -149,7 +149,7 @@ mqttClient.on("message", async (topic, message) => {
     console.log(`Received message on topic ${topic}: ${message}`);
     const uuid = message.toString();
     const isAuthorized = await verifyCard(uuid);
-    const responseTopic = `library/usersVerificationResponse/${uuid}`;
+    const responseTopic = `library/usersVerification/${uuid}`;
     mqttClient.publish(responseTopic, isAuthorized ? "authorized" : "unauthorized");
     console.log(`Card with UUID ${uuid} is ${isAuthorized ? "authorized" : "unauthorized"}`);
   }
