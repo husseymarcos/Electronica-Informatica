@@ -83,7 +83,7 @@ async function verifyCard(uuid) {
   try {
     await client.connect();
     const database = client.db(config.mongodb.database);
-    const collection = database.collection(config.mongodb.usersCollection);
+    const collection = database.collection(config.mongodb.usersRegisterCollection);
     const card = await collection.findOne({ uuid: uuid });
     return card !== null;
   } catch (error) {

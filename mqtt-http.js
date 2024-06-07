@@ -24,6 +24,10 @@ const app = express();
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'static')));
 
+
+// Mapa para almacenar las promesas pendientes de verificación
+// const pendingVerifications = new Map();
+
 // Ruta para agregar un libro
 app.post('/api/books/publish', (req, res) => {
   const book = req.body;
@@ -42,9 +46,13 @@ app.post('/api/books/publish', (req, res) => {
 // Ruta para verificación del RFID
 app.post('/api/rfid/verification', async (req, res) => {
   const { uuid } = req.body;
-  const responseTopic = `library/usersVerification/${uuid}`;
+  const responseTopic = `library/registerUsers/${uuid}`;
 
-  mqttClient.publish('library/usersVerification', uuid, (err) => {
+  /*const promise = new Promise((resolve, reject) =>{
+    pendingVerifications.set(responseTopic, {resolve, reject});
+  })*/
+
+  mqttClient.publish('library/registerUsers', uuid, (err) => {
     if (err) {
       console.error("Error al publicar en MQTT:", err);
       res.status(500).send("Error al verificar la tarjeta.");
@@ -59,7 +67,15 @@ app.post('/api/rfid/verification', async (req, res) => {
   });
 });
 
+// Manejar los mensajes recibidos en los tópicos de respuesta
 
+/*mqttClient.on('message', (topic, message) =>{
+  if (pendingVerifications.has(topic)) {
+    const { resolve } = pendingVerifications.get(topic);
+    resolve(message.toString());
+    pendingVerifications.delete(topic);
+  }
+});*/
 
 // Hacer que el http escuche a una variable que cambia. Eso es cuando se agrega una tarjeta.
 // Si cambia el estado de esa variable, el http permite llevar al login.html
