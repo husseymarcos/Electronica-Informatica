@@ -8,5 +8,5 @@
 
 - Que informe en el serial monitor de Arduino, que:
 - Que ingresaste correctamente con la verificación del RFID
-- Que el libro que solicitaste ha sido solicitado correctamente
+- Que el libro que solicitaste ha sido solicitado correctamente (lógica de la solicitud)
 - Que informe que el libro agregado fue agregado correctamente 
