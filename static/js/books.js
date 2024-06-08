@@ -17,51 +17,44 @@ function fetchAllBooks() {
                 const listItem = document.createElement('li');
                 listItem.innerHTML = `
                     <h3>${book.title}</h3>
-                    <p>Author: ${book.author}</p>
-                    <p>Genre: ${book.genre}</p>
-                    <p>Year: ${book.year}</p>
-                    <button onclick="deleteBook('${book._id}')">Delete</button>
+                    <p>Autor: ${book.author}</p>
+                    <p>Género: ${book.genre}</p>
+                    <p>Año: ${book.year}</p>
+                    <button onclick="requestBook('${book._id}')">Solicitar</button>
                 `;
                 booksList.appendChild(listItem);
             });
         })
         .catch(error => {
             console.error('Error:', error);
-            // Handle error, show message to user
+            const messageElement = document.getElementById('message');
+            messageElement.innerText = "Error al cargar la lista de libros. Por favor, intenta nuevamente más tarde.";
         });
 }
 
-// Function to delete a book
-function deleteBook(bookId) {
-    const confirmed = confirm("Are you sure you want to delete this book?");
-    if (confirmed) {
-        fetch(`/api/books/delete/${bookId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Failed to delete book: ${response.status} ${response.statusText}`);
-                }
-                // Reload the books list after deletion
-                fetchAllBooks();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to delete book. Please try again.');
-                // Handle error, show message to user
-            });
-    }
+// Function to request a book
+function requestBook(bookId) {
+    fetch(`/api/books/request/${bookId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Failed to request book: ${response.status} ${response.statusText}`);
+        }
+        const messageElement = document.getElementById('message');
+        messageElement.innerText = "Libro solicitado exitosamente.";
+        messageElement.style.color = 'green';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const messageElement = document.getElementById('message');
+        messageElement.innerText = "Error al solicitar el libro. Por favor, intenta nuevamente.";
+        messageElement.style.color = 'red';
+    });
 }
-
-// Function to redirect to edit page for a book
-/*function editBook(bookId) {
-    // Redirect to edit page with book ID in query parameter
-    window.location.href = `editBook.html?id=${bookId}`;
-}*/
-
 
 // Entry point when the page loads
 document.addEventListener("DOMContentLoaded", function() {

@@ -107,6 +107,36 @@ async function verifyCard(uuid) {
 }
 
 
+// Solicitud de un libro
+async function requestBook(bookId){
+  const client = new MongoClient(mongoUri);
+
+  try{
+    await client.connect();
+    const database = client.db(config.mongodb.database);
+    const collection = database.collection(config.mongodb.bookCollection); // Libros que ya están agregados
+    const book = await collection.findOne({_id : bookId}); 
+    const requestCollection = database.collection(config.mongodb.bookRequestCollection); // Coleccion de libros a solicitar
+
+    if(book != null){
+      const bookData = {
+        _id: bookId
+      }
+      await requestCollection.insertOne(bookData); // Agrego la información del libro que quiero solicitar, para luego poder solicitarlo. 
+      const requestedBook = await requestCollection.findOne(bookData); // Busco el libro que fue solicitado en esa colección.
+      return requestedBook != null; // Si es true, quiere decir que el libro que solicitaste está disponible
+    } else{
+      return false; // El libro no se encontró, porque ni siquiera está en la colección de libros agregados.
+    }
+  } catch(error){
+    console.error("Error requesting book:", error);
+    return 'error';
+  } finally{
+    await client.close();
+  }
+}
+
+
 // Conectar al broker MQTT y suscribirse a los tópicos -> Este escucha toda la información que se va ir publicando. Luego esa información la sube a la db
 mqttClient.on("connect", () => {
   mqttClient.subscribe("library/books", (err) => { // con el + indico que quiero que se suscriba a todos. Si en lugar de + especifico uno particular, evidentemente va a escuchar solo ese topic.
@@ -133,6 +163,14 @@ mqttClient.on("connect", () => {
       }
   });
 
+  mqttClient.subscribe("library/bookRequests/#", (err) =>{
+    if(!err){
+      console.log("Connected and subscribed to topic library/bookRequests/#");
+    } else{
+      console.error("Error subscribing to topic library/bookRequests/#", err);
+    }
+
+  });
   
 });
 
@@ -164,6 +202,15 @@ mqttClient.on("message", async (topic, message) => {
     const responseTopic = `library/usersVerification/${uuid}`;
     mqttClient.publish(responseTopic, isAuthorized ? "authorized" : "unauthorized");
     console.log(`Card with UUID ${uuid} is ${isAuthorized ? "authorized" : "unauthorized"}`);
+  }
+
+  // Manejar las solicitudes de libros
+  if(topic.startsWith("library/bookRequests/")){
+    const bookId = topic.split('/').pop();
+    const status = await requestBook(bookId);
+    const responseTopic = `library/bookRequests/${bookId}`;
+    mqttClient.publish(responseTopic, status);
+    console.log(`Book with ID ${bookId} is ${status}`);
   }
 });
 

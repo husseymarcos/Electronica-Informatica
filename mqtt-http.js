@@ -21,11 +21,22 @@ const wss = new WebSocket.Server({ noServer: true });
 // Mapa para almacenar las promesas pendientes de verificación
 const pendingVerifications = new Map();
 
+// Mapa para almacenar las promesas de solicitud de libros
+const pendingRequests = new Map();
+
 // Suscribirse al tópico de respuesta cuando se conecta al servidor MQTT
 mqttClient.on('connect', () => {
   mqttClient.subscribe('library/usersVerification/#', (err) => {
     if (!err) {
       console.log('Suscrito a library/usersVerification/#');
+    } else {
+      console.error('Error al suscribirse al tópico:', err);
+    }
+  });
+
+  mqttClient.subscribe('library/bookRequests/#', (err) => {
+    if (!err) {
+      console.log('Suscrito a library/bookRequests/#');
     } else {
       console.error('Error al suscribirse al tópico:', err);
     }
@@ -82,7 +93,43 @@ app.post('/api/rfid/verification', async (req, res) => {
   }
 });
 
-// Manejar los mensajes recibidos en los tópicos de respuesta
+
+
+// Ruta para SOLICITUD de LIBROS
+
+app.post('/api/books/request/:id', async (req, res) => {
+  const bookId = req.params.id;
+  const responseTopic = `library/bookRequests/${bookId}`;
+
+  const requestPromise = new Promise((resolve, reject) => {
+    pendingRequests.set(responseTopic, { resolve, reject });
+  });
+
+  mqttClient.publish('library/bookRequests', bookId, (err) => {
+    if (err) {
+      console.error("Error al publicar en MQTT:", err);
+      res.status(500).send("Error al solicitar el libro.");
+      pendingRequests.delete(responseTopic);
+    }
+  });
+
+  try {
+    const status = await requestPromise;
+    if (status === 'available') {
+      res.json({ status: 'success', message: 'Libro disponible' });
+    } else {
+      res.status(403).json({ status: 'error', message: 'Libro no disponible' });
+    }
+  } catch (error) {
+    res.status(500).send("Error al solicitar el libro.");
+  } finally {
+    pendingRequests.delete(responseTopic);
+  }
+});
+
+
+
+// Manejar los mensajes recibidos en los tópicos de respuesta - Verificación de RFID
 mqttClient.on('message', (topic, message) => {
   console.log(`Mensaje recibido en el tópico ${topic}: ${message}`);
   if (pendingVerifications.has(topic)) {
@@ -120,3 +167,6 @@ server.on('upgrade', (request, socket, head) => {
     wss.emit('connection', ws, request);
   });
 });
+
+
+
