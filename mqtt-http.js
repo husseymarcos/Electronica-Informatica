@@ -108,12 +108,16 @@ app.post('/api/rfid/verification', async (req, res) => {
     }
   });
 
+
   try {
     const status = await verificationPromise;
     if (status === 'authorized') {
       // Send response indicating success
       res.json({ status: 'success', message: 'authorized' });
       console.log("publique la res");
+ 
+      // Publicar en el topic de confirmación - Comunicación con ESP32 
+      mqttClient.publish('library/confirmVerification', 'Ingreso a LibrosExpress realizado');
     } else {
       res.status(403).json({ status: 'error', message: 'unauthorized' });
     }

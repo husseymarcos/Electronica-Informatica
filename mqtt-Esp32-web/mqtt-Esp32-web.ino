@@ -92,6 +92,10 @@ void loop() {
 
       //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
       MQTT_CLIENT.publish("library/usersVerification", uuidCharArray); 
+
+
+      // Hago un subscribe a un topic para que me informe que ingresamos en la página web una vez que ingresamos la tarjeta
+      MQTT_CLIENT.subscribe("library/confirmVerification");
     
       lastUUID = uuid;
     }
@@ -152,7 +156,7 @@ void reconnect() {
 }
 
 
-// Función de callback para manejar los mensajes MQTT 
+// Función de callback para manejar los mensajes MQTT - ConfirmVerification
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Mensaje recibido [");
   Serial.print(topic);
@@ -162,7 +166,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   msg[length] = '\0';
   Serial.println(msg);
 
-  if (String(topic) == "library/usersVerification/#") {
+  if (String(topic) == "library/confirmVerification") {
     Serial.println("Ingreso a LibrosExpress realizado.");
   }
 }
