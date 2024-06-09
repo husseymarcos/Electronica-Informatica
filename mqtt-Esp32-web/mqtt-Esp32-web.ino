@@ -126,10 +126,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 */
 
+
+
 // Reconecta con MQTT broker
 void reconnect() {
   // MQTT_CLIENT.setServer("192.168.1.206", 1883); // si uso un servidor local <ver IP correcta>
   MQTT_CLIENT.setServer("52.205.208.184", 1883);  // servidor gratuito
+  MQTT_CLIENT.setCallBack(callback); 
 
   MQTT_CLIENT.setClient(WIFI_CLIENT);
 
@@ -144,5 +147,21 @@ void reconnect() {
       Serial.println(MQTT_CLIENT.state());
       delay(2000);
     }
+  }
+}
+
+
+// Función de callback para manejar los mensajes MQTT 
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Mensaje recibido [");
+  Serial.print(topic);
+  Serial.print("]: ");
+  char msg[length + 1];
+  memcpy(msg, payload, length);
+  msg[length] = '\0';
+  Serial.println(msg);
+
+  if (String(topic) == "library/usersVerification") {
+    Serial.println("Ingreso a LibrosExpress realizado.");
   }
 }
