@@ -202,6 +202,11 @@ mqttClient.on("message", async (topic, message) => {
     const responseTopic = `library/usersVerification/${uuid}`;
     mqttClient.publish(responseTopic, isAuthorized ? "authorized" : "unauthorized");
     console.log(`Card with UUID ${uuid} is ${isAuthorized ? "authorized" : "unauthorized"}`);
+
+    // Publicar confirmación en el topic adecuado - Vinculación con el ESP32 
+    if (isAuthorized) {
+        mqttClient.publish("library/confirmVerification", "Ingreso a LibrosExpress realizado");
+    }
   }
 
   // Manejar las solicitudes de libros
