@@ -64,6 +64,11 @@ app.post('/api/rfid/verification', async (req, res) => {
   const { uuid } = req.body;
   const responseTopic = `library/usersVerification/${uuid}`;
 
+  // Verificar si ya hay una promesa pendiente para esta UUID
+  if (pendingVerifications.has(responseTopic)) {
+    return res.status(429).send("Verification already in progress.");
+  }
+
   const verificationPromise = new Promise((resolve, reject) => {
     pendingVerifications.set(responseTopic, { resolve, reject });
   });
@@ -100,6 +105,10 @@ app.post('/api/rfid/verification', async (req, res) => {
 app.post('/api/books/request/:id', async (req, res) => {
   const bookId = req.params.id;
   const responseTopic = `library/bookRequests/${bookId}`;
+
+  if (pendingRequests.has(responseTopic)) {
+    return res.status(429).send("Verification already in progress.");
+  }
 
   const requestPromise = new Promise((resolve, reject) => {
     pendingRequests.set(responseTopic, { resolve, reject });

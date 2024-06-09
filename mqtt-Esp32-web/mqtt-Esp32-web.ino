@@ -39,6 +39,8 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 const char* ssid = "Telecentro-40fe";
 const char* password = "898PHFSD88L7";
 
+String lastUUID = ""; // Logica para evitar tener que manejar si agrego varias veces la tarjeta que no la agregue 30 veces en la db
+
 void setup() {
   Serial.begin(115200);
   while(!Serial);
@@ -78,17 +80,22 @@ void loop() {
     }
     Serial.println(uuid); // Imprimimos el UUID en el monitor serial
 
-    char uuidCharArray[10];
-    uuid.toCharArray(uuidCharArray, 10);
-    //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
 
+    if(uuid != lastUUID){
+      char uuidCharArray[10];
+      uuid.toCharArray(uuidCharArray, 10);
 
-    // Topic with the result of the query with the current card.
-    //MQTT_CLIENT.subscribe("library/usersVerification"); 
+      //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
 
-    //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
-    MQTT_CLIENT.publish("library/usersVerification", uuidCharArray);
+      // Topic with the result of the query with the current card.
+      //MQTT_CLIENT.subscribe("library/usersVerification"); 
 
+      //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
+      MQTT_CLIENT.publish("library/usersVerification", uuidCharArray); 
+      lastUUID = uuid;
+    }
+    
+    
     // Parte de la comunicación desde la pagina web
     // MQTT_CLIENT.setCallback(callback);
     
@@ -129,11 +136,13 @@ void reconnect() {
   // Intentando conectar con el broker.
   while (!MQTT_CLIENT.connected()) {
     Serial.println("Intentando conectar con MQTT.");
-    MQTT_CLIENT.connect("library"); // Escribe cualquier nombre.
+    if(MQTT_CLIENT.connect("library")){
+      Serial.println("Conectado a MQTT"); // Escribe cualquier nombre.
 
-    // Espera antes de volver a intentarlo.
-    delay(3000);
+    } else{
+      Serial.print("Error de conexión - Estado: ");
+      Serial.println(MQTT_CLIENT.state());
+      delay(2000);
+    }
   }
-
-  Serial.println("Conectado a MQTT.");
 }
