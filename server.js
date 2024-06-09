@@ -136,6 +136,26 @@ async function requestBook(bookId){
   }
 }
 
+async function confirmVerification(successMsg){
+  const client = new MongoClient(mongoUri);
+  try{
+    await client.connect();
+    const database = client.db(config.mongodb.database);
+    const collection = database.collection(config.mongodb.confirmVerificationCollection);
+
+    const doc = {
+      success: successMsg
+    }
+
+    await collection.insertOne(doc);
+
+  } catch(error){
+    console.error("Error al insertar el documento:", error);
+  } finally{
+    await client.close();
+  }
+
+}
 
 // Conectar al broker MQTT y suscribirse a los tópicos -> Este escucha toda la información que se va ir publicando. Luego esa información la sube a la db
 mqttClient.on("connect", () => {
@@ -205,7 +225,7 @@ mqttClient.on("message", async (topic, message) => {
 
     // Publicar confirmación en el topic adecuado - Vinculación con el ESP32 
     if (isAuthorized) {
-        mqttClient.publish("library/confirmVerification", "Ingreso a LibrosExpress realizado");
+      confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
     }
   }
 
