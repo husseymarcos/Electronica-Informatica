@@ -132,6 +132,20 @@ void callback(char* topic, byte* payload, unsigned int length) {
 */
 
 
+// Función de callback para manejar los mensajes MQTT - ConfirmVerification
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Mensaje recibido [");
+  Serial.print(topic);
+  Serial.print("]: ");
+  char msg[length + 1];
+  memcpy(msg, payload, length);
+  msg[length] = '\0';
+  Serial.println(msg);
+
+  if (String(topic) == "library/confirmVerification") {
+    Serial.println("Ingreso a LibrosExpress realizado.");
+  }
+}
 
 // Reconecta con MQTT broker
 void reconnect() {
@@ -156,17 +170,3 @@ void reconnect() {
 }
 
 
-// Función de callback para manejar los mensajes MQTT - ConfirmVerification
-void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Mensaje recibido [");
-  Serial.print(topic);
-  Serial.print("]: ");
-  char msg[length + 1];
-  memcpy(msg, payload, length);
-  msg[length] = '\0';
-  Serial.println(msg);
-
-  if (String(topic) == "library/confirmVerification") {
-    Serial.println("Ingreso a LibrosExpress realizado.");
-  }
-}
