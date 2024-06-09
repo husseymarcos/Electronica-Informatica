@@ -130,7 +130,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 // Función de callback para manejar los mensajes MQTT - ConfirmVerification
 void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Ejecutando el callback");
   Serial.print("Mensaje recibido [");
   Serial.print(topic);
   Serial.print("]: ");
@@ -150,14 +149,13 @@ void reconnect() {
   MQTT_CLIENT.setServer("52.205.208.184", 1883);  // servidor gratuito
   MQTT_CLIENT.setClient(WIFI_CLIENT);
 
-  Serial.print("Por ejecutar el callback");
-  MQTT_CLIENT.setCallback(callback); 
-
   // Intentando conectar con el broker.
   while (!MQTT_CLIENT.connected()) {
     Serial.println("Intentando conectar con MQTT.");
     if(MQTT_CLIENT.connect("library")){
       Serial.println("Conectado a MQTT"); // Escribe cualquier nombre.
+      
+      MQTT_CLIENT.setCallback(callback); 
       // Hago un subscribe a un topic para que me informe que ingresamos en la página web una vez que ingresamos la tarjeta
       MQTT_CLIENT.subscribe("library/confirmVerification");
 
