@@ -129,7 +129,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 // Reconecta con MQTT broker
 void reconnect() {
   // MQTT_CLIENT.setServer("192.168.1.206", 1883); // si uso un servidor local <ver IP correcta>
-  MQTT_CLIENT.setServer("34.204.78.41", 1883);  // servidor gratuito
+  MQTT_CLIENT.setServer("52.205.208.184", 1883);  // servidor gratuito
 
   MQTT_CLIENT.setClient(WIFI_CLIENT);
 
