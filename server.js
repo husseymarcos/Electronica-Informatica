@@ -78,7 +78,7 @@ async function addUserCardToDB(uuid) { // Acá defino los datos que debe recibir
 
 
 // Verificación de la tarjeta RFID
-async function verifyCard(uuid) {
+async function verifyCard(uuid) { // Creo que por este lado ocurre el error de agregar 40 veces lo mismo
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();

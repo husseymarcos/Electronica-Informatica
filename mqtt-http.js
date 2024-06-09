@@ -6,6 +6,9 @@ const config = require('./config');
 const { verifyCard } = require('./server'); // Importar la función verifyCard
 const WebSocket = require('ws');
 
+// Configuración de mongoDB
+var mongoUri = 'mongodb://' + config.mongodb.hostname + ':' + config.mongodb.port + '/' + config.mongodb.database;
+
 // Configuración de MQTT
 var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port; // Broker de MQTT
 const mqttClient = mqtt.connect(mqttUri);
@@ -42,6 +45,28 @@ mqttClient.on('connect', () => {
     }
   });
 });
+
+
+// Ruta para obtener todos los libros
+app.get('/api/books', async (req, res) => {
+  const client = new MongoClient(mongoUri);
+
+  try {
+    await client.connect();
+    const database = client.db(config.mongodb.database);
+    const collection = database.collection(config.mongodb.bookCollection);
+    const books = await collection.find({}).toArray();
+
+    res.json(books);
+  } catch (error) {
+    console.error('Error al obtener la lista de libros:', error);
+    res.status(500).send('Error al obtener la lista de libros.');
+  } finally {
+    await client.close();
+  }
+});
+
+
 
 // Ruta para agregar un libro
 app.post('/api/books/publish', (req, res) => {
