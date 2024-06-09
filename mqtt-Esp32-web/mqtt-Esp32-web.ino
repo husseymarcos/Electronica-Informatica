@@ -126,8 +126,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 */
-
-MQTT_CLIENT.setCallback(callback); 
+ 
 
 // Función de callback para manejar los mensajes MQTT - ConfirmVerification
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -156,8 +155,8 @@ void reconnect() {
     if(MQTT_CLIENT.connect("library")){
       Serial.println("Conectado a MQTT"); // Escribe cualquier nombre.
         if (MQTT_CLIENT.subscribe("library/confirmVerification")) {
-          Serial.println("Suscripción a library/confirmVerification realizada con éxito");
-          Serial.println("Ingreso correcto a LibrosExpress");
+         Serial.println("Suscripción a library/confirmVerification realizada con éxito");
+         MQTT_CLIENT.setCallback(callback);
         } else {
           Serial.println("Error al suscribirse a library/confirmVerification");
         }
