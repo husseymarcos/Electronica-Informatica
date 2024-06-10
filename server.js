@@ -32,11 +32,16 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
       content: message // Este message engloba toda la información del formato json, es decir title, author, etc.
     };
 
-    // Insertar el documento en la colección
-    const result = await collection.insertOne(doc);
+    // Verificar si ya existe un usuario con el mismo UUID
+    const existingBook = await collection.findOne({"content.title": bookData.title});
 
-    // Imprimir el ID del documento insertado
-    console.log(`Documento insertado con el _id: ${result.insertedId}`);
+    if(!existingBook){
+      // Insertar el documento en la colección
+      const result = await collection.insertOne(doc);
+      console.log(`Documento insertado con el _id: ${result.insertedId}`);
+    } else{
+      console.log(`El libro con título "${bookData.title}" ya existe en la base de datos.`);
+    }
   } catch (error) {
     console.error("Error al insertar el documento:", error);
   } finally {

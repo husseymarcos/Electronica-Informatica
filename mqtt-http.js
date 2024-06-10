@@ -73,15 +73,14 @@ app.get('/api/books', async (req, res) => {
 app.post('/api/books/publish', (req, res) => {
   const book = req.body;
   
-  // Publicar el libro en el tópico MQTT
-  mqttClient.publish('library/books', JSON.stringify(book), (err) => {
-    if (err) {
-      console.error("Error al publicar en MQTT:", err);
-      res.status(500).send("Error al agregar el libro.");
-    } else {
-      res.status(200).send("Libro agregado exitosamente.");
-    }
-  });
+ // Llama a la función para agregar libros desde server.js
+ addBookToDB(book).then(() => {
+  res.status(200).send("Libro agregado exitosamente.");
+}).catch((error) => {
+  console.error("Error al agregar el libro:", error);
+  res.status(500).send("Error al agregar el libro.");
+});
+
 });
 
 // Ruta para verificación del RFID
