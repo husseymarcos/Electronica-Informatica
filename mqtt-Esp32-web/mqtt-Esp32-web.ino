@@ -68,7 +68,7 @@ void setup() {
 
 
   MQTT_CLIENT.setClient(WIFI_CLIENT);
-  MQTT_CLIENT.setServer("54.196.112.249", 1883);  // servidor gratuito 
+  MQTT_CLIENT.setServer("54.196.112.249", 1883);  // public IP
   MQTT_CLIENT.setCallback(callback);
 
 
