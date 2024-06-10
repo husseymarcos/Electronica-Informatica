@@ -223,6 +223,7 @@ mqttClient.on("message", async (topic, message) => {
     const messageString = message.toString();
     console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
     addBookToDB(messageString).catch(console.dir);
+    mqttClient.publish("library/books",`Received message on topic ${topic}: ${message}`);
 
   } 
 
@@ -242,6 +243,7 @@ mqttClient.on("message", async (topic, message) => {
     const responseTopic = `library/usersVerification/${uuid}`;
     mqttClient.publish(responseTopic, isAuthorized ? "authorized" : "unauthorized");
     console.log(`Card with UUID ${uuid} is ${isAuthorized ? "authorized" : "unauthorized"}`);
+    mqttClient.publish("library/usersVerification", `Received message on topic ${topic}: ${message}`);
 
     // Publicar confirmación en el topic adecuado - Vinculación con el ESP32 
     if (isAuthorized) {

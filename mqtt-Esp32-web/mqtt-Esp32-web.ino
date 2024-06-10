@@ -99,7 +99,7 @@ void loop() {
 
       // Topic with the result of the query with the current card.
       // MQTT_CLIENT.subscribe("library/usersVerification"); 
-      MQTT_CLIENT.subscribe("library/books"); // Escucha lo que se publique en addBooks. 
+      // MQTT_CLIENT.subscribe("library/books"); // Escucha lo que se publique en addBooks. 
 
       //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
       MQTT_CLIENT.publish("library/usersVerification", uuidCharArray); 
@@ -210,7 +210,7 @@ void reconnect() {
         Serial.print("Estoy suscripto a library/usersVerification");
       }
       
-      if(MQTT_CLIENT.subscribe("library/confirmVerification"))){
+      if(MQTT_CLIENT.subscribe("library/confirmVerification")){
         Serial.print("Estoy suscripto a library/confirmVerification");
       }
 
