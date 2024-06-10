@@ -142,7 +142,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 // Función de callback para manejar los mensajes MQTT - ConfirmVerification
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Callback ejecutado");
-  
+
   Serial.print("Mensaje recibido [");
   Serial.print(topic);
   Serial.print("]: ");
@@ -195,7 +195,7 @@ void reconnect() {
   // Intentando conectar con el broker.
   while (!MQTT_CLIENT.connected()) {
     Serial.println("Intentando conectar con MQTT.");
-    if(MQTT_CLIENT.connect("library")){
+    if(MQTT_CLIENT.connect("ESP32Client")){
       Serial.println("Conectado a MQTT"); // Escribe cualquier nombre.
       MQTT_CLIENT.subscribe("library/books");
       MQTT_CLIENT.subscribe("library/confirmVerification");
