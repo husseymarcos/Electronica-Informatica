@@ -36,8 +36,8 @@ PubSubClient MQTT_CLIENT;
 MFRC522 mfrc522(SS_PIN, RST_PIN); 
 
 // Nombre y contraseña de tu red WiFi.
-const char* ssid = "Telecentro-40fe";
-const char* password = "898PHFSD88L7";
+const char* ssid = "UA-Alumnos";
+const char* password = "41umn05WLC";
 
 String lastUUID = ""; // Logica para evitar tener que manejar si agrego varias veces la tarjeta que no la agregue 30 veces en la db
 
@@ -62,6 +62,8 @@ void setup() {
   Serial.println("WiFi conectado.");
   Serial.println("IP: ");
   Serial.println(WiFi.localIP());
+ 
+  MQTT_CLIENT.setCallback(callback);
 }
 
 void loop() {
@@ -89,6 +91,7 @@ void loop() {
 
       // Topic with the result of the query with the current card.
       // MQTT_CLIENT.subscribe("library/usersVerification"); 
+      MQTT_CLIENT.suscribe("library/books")); // Escucha lo que se publique en addBooks. 
 
       //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
       MQTT_CLIENT.publish("library/usersVerification", uuidCharArray); 
@@ -138,6 +141,18 @@ void callback(char* topic, byte* payload, unsigned int length) {
   msg[length] = '\0';
   Serial.println(msg);
 
+  DynamicJsonDocument doc(1024);
+  deserializeJson(doc, payload, length);
+
+  if(String(topic) == "library/books"){
+    const char* = title = doc("title");
+    const char* = author = doc("author");
+    int year = doc("year");
+
+    Serial.print("Title: ");
+    Serial.println(title);
+    
+  }
   if (String(topic) == "library/confirmVerification") {
     Serial.println("Ingreso a LibrosExpress realizado.");
   }
@@ -146,12 +161,16 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print("Actualización en library/mybooks: ");
     Serial.println(msg);
   }
+
+
+
+  
 }
 
 // Reconecta con MQTT broker
 void reconnect() {
   // MQTT_CLIENT.setServer("192.168.1.206", 1883); // si uso un servidor local <ver IP correcta>
-  MQTT_CLIENT.setServer("54.166.145.105", 1883);  // servidor gratuito
+  MQTT_CLIENT.setServer("54.196.112.249", 1883);  // servidor gratuito
   MQTT_CLIENT.setClient(WIFI_CLIENT);
 
   // Intentando conectar con el broker.
@@ -161,7 +180,6 @@ void reconnect() {
       Serial.println("Conectado a MQTT"); // Escribe cualquier nombre.
         if (MQTT_CLIENT.subscribe("library/confirmVerification")) {
          Serial.println("Suscripción a library/confirmVerification realizada con éxito");
-         MQTT_CLIENT.setCallback(callback);
         } else {
           Serial.println("Error al suscribirse a library/confirmVerification");
         }
