@@ -14,12 +14,15 @@ function fetchAllBooks() {
             booksList.innerHTML = '';
 
             books.forEach(book => {
+
+                const content = JSON.parse(book.content);
+
                 const listItem = document.createElement('li');
                 listItem.innerHTML = `
-                    <h3>${book.title}</h3>
-                    <p>Autor: ${book.author}</p>
-                    <p>Género: ${book.genre}</p>
-                    <p>Año: ${book.year}</p>
+                    <h3>${content.title}</h3>
+                    <p>Autor: ${content.author}</p>
+                    <p>Género: ${content.genre}</p>
+                    <p>Año: ${content.year}</p>
                     <button onclick="requestBook('${book._id}')">Solicitar</button>
                 `;
                 booksList.appendChild(listItem);
