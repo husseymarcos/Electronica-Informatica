@@ -27,7 +27,7 @@
       console.log('Mensaje recibido del servidor WebSocket:', event.data);
       const data = JSON.parse(event.data);
 
-      if (data.topic.startsWith('library/usersVerification/')) {
+      if (data.topic.startsWith('library/registerUsers/')) {
         // Extract UUID from the topic
         const uuid = data.topic.split('/').pop();
         verifyCard(uuid);
