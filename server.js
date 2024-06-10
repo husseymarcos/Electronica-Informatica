@@ -258,6 +258,7 @@ mqttClient.on("message", async (topic, message) => {
     const status = await requestBook(bookId);
     const responseTopic = `library/bookRequests/${bookId}`;
     mqttClient.publish(responseTopic, status);
+    mqttClient.publish("library/myBooks", `Book with ID ${bookId} is ${status}`);
     console.log(`Book with ID ${bookId} is ${status}`);
   }
 });

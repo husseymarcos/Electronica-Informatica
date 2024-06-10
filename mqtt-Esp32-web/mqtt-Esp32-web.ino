@@ -141,6 +141,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (String(topic) == "library/confirmVerification") {
     Serial.println("Ingreso a LibrosExpress realizado.");
   }
+
+  if(String(topic) == "library/myBooks"){
+    Serial.print("Actualización en library/mybooks: ");
+    Serial.println(msg);
+  }
 }
 
 // Reconecta con MQTT broker
