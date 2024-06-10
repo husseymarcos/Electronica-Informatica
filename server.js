@@ -68,11 +68,19 @@ async function addUserCardToDB(uuid) { // Acá defino los datos que debe recibir
       uuid: uuid // Este message engloba toda la información del formato json, uuid.
     };
 
-    // Insertar el documento en la colección
-    const result = await collection.insertOne(doc);
+    // Verificar si ya existe un usuario con el mismo UUID
+    const existingUser = await collection.findOne(doc);
 
-    // Imprimir el ID del documento insertado
-    console.log(`Documento insertado con el _id: ${result.insertedId}`);
+    if(!existingUser){
+      // Insertar el documento en la colección
+      const result = await collection.insertOne(doc);
+      console.log(`El libro "${doc.content.title}" fue insertado`);
+      console.log(`Documento insertado con el _id: ${result.insertedId}`);
+      return true;
+    } else{
+      return false;
+    }
+      
   } catch (error) {
     console.error("Error al insertar el documento:", error);
   } finally {
@@ -221,7 +229,23 @@ mqttClient.on("message", async (topic, message) => {
     console.log(`Received message on topic ${topic}: ${message}`);
     const uuid = message.toString();
     console.log(`Mensaje recibido en el tópico ${topic}: ${uuid}`);
-    addUserCardToDB(uuid).catch(console.dir);
+    if(addUserCardToDB(uuid).catch(console.dir)){
+      console.log(`Tarjeta con UUID ${uuid} agregada correctamente`);
+    }
+    else{
+      const isAuthorized = await verifyCard(uuid);
+      const responseTopic = `library/usersVerification/${uuid}`;
+      mqttClient.publish(responseTopic, isAuthorized ? "authorized" : "unauthorized");
+      console.log(`Card with UUID ${uuid} is ${isAuthorized ? "authorized" : "unauthorized"}`);
+      // Publicar confirmación en el topic adecuado - Vinculación con el ESP32 
+      if (isAuthorized) {
+          confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
+          // Publicar en el topic de confirmación - Comunicación con ESP32 
+          mqttClient.publish('library/confirmVerification', `Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
+      }
+    }
+
+
   }
   
   // Verifica el estado del usuario
