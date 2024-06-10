@@ -98,8 +98,8 @@ async function verifyCard(uuid) { // Creo que por este lado ocurre el error de a
         uuid: uuid
       }
       await verificationCollections.insertOne(userData); // Agregamos esa data de registro a la de verificación. De esta forma aseguramos que todo usuario registrado esté autorizado.
-      const verifyUser = await verificationCollections.findOne(userData); // lo busca.
-      return verifyUser != null; // Si está true, en teoría está autorizado.
+      // const verifyUser = await verificationCollections.findOne(userData); // lo busca.
+      return card; // Si está true, en teoría está autorizado.
     }
     else{
       return false; // el usuario no existe y por tanto la lógica no se hace
@@ -124,13 +124,18 @@ async function requestBook(bookId){
     const book = await collection.findOne({_id : bookId}); 
     const requestCollection = database.collection(config.mongodb.bookRequestCollection); // Coleccion de libros a solicitar
 
+    const myBooks = database.collection(config.mongodb.myBooksCollection); // Traigo la colección de "mis libros"
     if(book != null){
       const bookData = {
         _id: bookId
       }
       await requestCollection.insertOne(bookData); // Agrego la información del libro que quiero solicitar, para luego poder solicitarlo. 
-      const requestedBook = await requestCollection.findOne(bookData); // Busco el libro que fue solicitado en esa colección.
-      return requestedBook != null; // Si es true, quiere decir que el libro que solicitaste está disponible
+      // const requestedBook = await requestCollection.findOne(bookData); // Busco el libro que fue solicitado en esa colección.
+
+      // Agrego esa información a la colección de myBooks
+      await myBooks.insertOne(bookData);
+
+      return book; // Si es true, quiere decir que el libro que solicitaste está disponible
     } else{
       return false; // El libro no se encontró, porque ni siquiera está en la colección de libros agregados.
     }
@@ -197,6 +202,15 @@ mqttClient.on("connect", () => {
     }
 
   });
+
+  mqttClient.subscribe("library/myBooks", (err) =>{
+    if(!err){
+      console.log("Connected and subscribed to topic library/myBooks");
+    } else{
+      console.error("Error subscribing to topic library/myBooks", err);
+    }
+
+  });
   
 });
 
@@ -239,7 +253,8 @@ mqttClient.on("message", async (topic, message) => {
 
   // Manejar las solicitudes de libros
   if(topic.startsWith("library/bookRequests/")){
-    const bookId = topic.split('/').pop();
+    console.log(`Received message on topic ${topic}: ${message}`); // Si puedo ver el mensaje acá luego puedo realizar la lógica de agregarlo a mi db de myBooks.
+    const bookId = topic.split('/').pop().toString();
     const status = await requestBook(bookId);
     const responseTopic = `library/bookRequests/${bookId}`;
     mqttClient.publish(responseTopic, status);

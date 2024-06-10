@@ -147,6 +147,7 @@ app.post('/api/books/request/:id', async (req, res) => {
   });
 
   mqttClient.publish('library/bookRequests', bookId, (err) => {
+    console.log("Estoy ejecutando la publicación en el topic library/bookRequests");
     if (err) {
       console.error("Error al publicar en MQTT:", err);
       res.status(500).send("Error al solicitar el libro.");
