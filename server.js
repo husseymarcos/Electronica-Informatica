@@ -232,6 +232,8 @@ mqttClient.on("message", async (topic, message) => {
     // Publicar confirmación en el topic adecuado - Vinculación con el ESP32 
     if (isAuthorized) {
       confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
+      // Publicar en el topic de confirmación - Comunicación con ESP32 
+      mqttClient.publish('library/confirmVerification', `Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
     }
   }
 

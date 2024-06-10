@@ -89,6 +89,7 @@ app.post('/api/rfid/verification', async (req, res) => {
   console.log("llegué a hacer algo en /api/rfid/verification");
   const { uuid } = req.body;
   const responseTopic = `library/usersVerification/${uuid}`;
+  
 
   // Verificar si ya hay una promesa pendiente para esta UUID
   if (pendingVerifications.has(responseTopic)) {
@@ -115,9 +116,10 @@ app.post('/api/rfid/verification', async (req, res) => {
       // Send response indicating success
       res.json({ status: 'success', message: 'authorized' });
       console.log("publique la res");
- 
       // Publicar en el topic de confirmación - Comunicación con ESP32 
-      mqttClient.publish('library/confirmVerification', 'Ingreso a LibrosExpress realizado');
+      mqttClient.publish('library/confirmVerification', `Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
+      // si te lo llega a agregar 2 veces, fijate de manejarlo con el topic 
+ 
     } else {
       res.status(403).json({ status: 'error', message: 'unauthorized' });
     }
