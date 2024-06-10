@@ -33,14 +33,14 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
     };
 
     // Verificar si ya existe un usuario con el mismo UUID
-    const existingBook = await collection.findOne({"content.title": bookData.title});
+    const existingBook = await collection.findOne(doc);
 
     if(!existingBook){
       // Insertar el documento en la colección
       const result = await collection.insertOne(doc);
       console.log(`Documento insertado con el _id: ${result.insertedId}`);
     } else{
-      console.log(`El libro con título "${bookData.title}" ya existe en la base de datos.`);
+      console.log(`El libro con título "${content.title}" ya existe en la base de datos.`);
     }
   } catch (error) {
     console.error("Error al insertar el documento:", error);
@@ -256,4 +256,6 @@ podes hacerlo sí:
 Te elimina el doc que tenga de title "El principito"
 */ 
 
-
+module.exports = {
+  addBookToDB
+}
