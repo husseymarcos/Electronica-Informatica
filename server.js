@@ -193,13 +193,13 @@ mqttClient.on("connect", () => {
     }
   })
 
-  mqttClient.subscribe("library/usersVerification", (err) => {
+  /*mqttClient.subscribe("library/usersVerification", (err) => {
       if (!err) {
         console.log("Connected and subscribed to topic library/usersVerification");
       } else {
         console.error("Error subscribing to topic library/usersVerification:", err);
       }
-  });
+  });*/
 
   mqttClient.subscribe("library/bookRequests/#", (err) =>{
     if(!err){
@@ -234,7 +234,7 @@ mqttClient.on("message", async (topic, message) => {
     }
     else{
       const isAuthorized = await verifyCard(uuid);
-      const responseTopic = `library/usersVerification/${uuid}`;
+      const responseTopic = `library/registerUsers/${uuid}`;
       mqttClient.publish(responseTopic, isAuthorized ? "authorized" : "unauthorized");
       console.log(`Card with UUID ${uuid} is ${isAuthorized ? "authorized" : "unauthorized"}`);
       // Publicar confirmación en el topic adecuado - Vinculación con el ESP32 
@@ -249,7 +249,7 @@ mqttClient.on("message", async (topic, message) => {
   }
   
   // Verifica el estado del usuario
-  if (topic === "library/usersVerification") {
+  /*if (topic === "library/usersVerification") {
     console.log(`Received message on topic ${topic}: ${message}`);
     const uuid = message.toString();
     const isAuthorized = await verifyCard(uuid);
@@ -263,7 +263,7 @@ mqttClient.on("message", async (topic, message) => {
       // Publicar en el topic de confirmación - Comunicación con ESP32 
       mqttClient.publish('library/confirmVerification', `Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
     }
-  }
+  }*/
 
   // Manejar las solicitudes de libros
   if(topic.startsWith("library/bookRequests/")){

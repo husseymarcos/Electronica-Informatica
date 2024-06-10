@@ -16,7 +16,7 @@ config.mongodb.usersCollection = process.env.MONGODB_USERS_COLLECTION ||'usersVe
 config.mongodb.usersRegisterCollection = process.env.MONGODB_USERS_REGISTER_COLLECTION || 'registerUsers'; 
 config.mongodb.bookRequestCollection = process.env.MONGODB_BOOK_REQUEST_COLLECTION || 'bookRequests'; 
 config.mongodb.confirmVerificationCollection = process.env.MONGODB_CONFIRM_VERIFICATION_COLLECTION || 'confirmVerification';
-
+config.mongodb.myBooksCollection = process.env.MONGODB_MY_BOOKS_COLLECTION || 'mybooks';
 
 
 module.exports = config;    
