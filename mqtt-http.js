@@ -31,9 +31,9 @@ const pendingRequests = new Map();
 
 // Suscribirse al tópico de respuesta cuando se conecta al servidor MQTT
 mqttClient.on('connect', () => {
-  mqttClient.subscribe('library/usersVerification/#', (err) => {
+  mqttClient.subscribe('library/registerUsers/#', (err) => {
     if (!err) {
-      console.log('Suscrito a library/usersVerification/#');
+      console.log('Suscrito a library/registerUsers/#');
     } else {
       console.error('Error al suscribirse al tópico:', err);
     }
@@ -88,7 +88,7 @@ app.post('/api/books/publish', (req, res) => {
 app.post('/api/rfid/verification', async (req, res) => {
   console.log("llegué a hacer algo en /api/rfid/verification");
   const { uuid } = req.body;
-  const responseTopic = `library/usersVerification/${uuid}`;
+  const responseTopic = `library/registerUsers/${uuid}`;
   
 
   // Verificar si ya hay una promesa pendiente para esta UUID
@@ -100,8 +100,8 @@ app.post('/api/rfid/verification', async (req, res) => {
     pendingVerifications.set(responseTopic, { resolve, reject });
   });
 
-  mqttClient.publish('library/usersVerification', uuid, (err) => {
-    console.log("Estoy ejecutando la publicación en el topic library/usersVerification");
+  mqttClient.publish('library/registerUsers', uuid, (err) => {
+    console.log("Estoy ejecutando la publicación en el topic library/registerUsers");
     if (err) {
       console.error("Error al publicar en MQTT:", err);
       res.status(500).send("Error al verificar la tarjeta.");
