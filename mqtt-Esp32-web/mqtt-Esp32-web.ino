@@ -65,7 +65,11 @@ void setup() {
   Serial.println("WiFi conectado.");
   Serial.println("IP: ");
   Serial.println(WiFi.localIP());
- 
+
+
+
+  MQTT_CLIENT.setClient(WIFI_CLIENT);
+  MQTT_CLIENT.setServer("54.196.112.249", 1883);  // servidor gratuito 
   MQTT_CLIENT.setCallback(callback);
 
 
@@ -96,7 +100,7 @@ void loop() {
 
       // Topic with the result of the query with the current card.
       // MQTT_CLIENT.subscribe("library/usersVerification"); 
-      MQTT_CLIENT.subscribe(mqtt_topic_addBook)); // Escucha lo que se publique en addBooks. 
+      MQTT_CLIENT.subscribe(mqtt_topic_addBook); // Escucha lo que se publique en addBooks. 
 
       //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
       MQTT_CLIENT.publish("library/usersVerification", uuidCharArray); 
@@ -147,7 +151,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println(msg);
 
   DynamicJsonDocument doc(1024);
-  deserializeJson(doc, payload, length);
+  DeserializationError error = deserializeJson(doc, payload, length);
+
+  if(error){
+    Serial.print("failed");
+    Serial.println(error.c_str());
+    return;
+  }
+
 
   if(String(topic) == "library/books"){
     const char* title = doc["title"];
@@ -179,17 +190,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
 // Reconecta con MQTT broker
 void reconnect() {
   // MQTT_CLIENT.setServer("192.168.1.206", 1883); // si uso un servidor local <ver IP correcta>
-  MQTT_CLIENT.setServer("54.196.112.249", 1883);  // servidor gratuito
-  MQTT_CLIENT.setClient(WIFI_CLIENT);
-
+  
   // Intentando conectar con el broker.
   while (!MQTT_CLIENT.connected()) {
     Serial.println("Intentando conectar con MQTT.");
     if(MQTT_CLIENT.connect("library")){
       Serial.println("Conectado a MQTT"); // Escribe cualquier nombre.
-        MQTT_CLIENT.suscribe("library/books");
-        MQTT_CLIENT.suscribe("library/confirmVerification");
-        MQTT_CLIENT.suscribe("library/myBooks");
+        MQTT_CLIENT.subscribe("library/books");
+        MQTT_CLIENT.subscribe("library/confirmVerification");
+        MQTT_CLIENT.subscribe("library/myBooks");
 
     } else{
       Serial.print("Error de conexión - Estado: ");
