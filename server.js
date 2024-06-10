@@ -18,14 +18,16 @@ async function addBookToDB(message) {
     const database = client.db(config.mongodb.database);
     const collection = database.collection(config.mongodb.bookCollection);
 
-    const doc = JSON.parse(message);
-    const existingBook = await collection.findOne({ "content.title": doc.title });
+    const doc = {
+      content: message
+    }
+    const existingBook = await collection.findOne(doc);
 
     if (!existingBook) {
-      const result = await collection.insertOne({ content: doc });
-      console.log(`El libro "${doc.title}" fue insertado con el _id: ${result.insertedId}`);
+      const result = await collection.insertOne(doc);
+      console.log(`El libro "${content.title}" fue insertado con el _id: ${result.insertedId}`);
     } else {
-      console.log(`El libro con título "${doc.title}" ya existe en la base de datos.`);
+      console.log(`El libro con título "${content.title}" ya existe en la base de datos.`);
     }
   } catch (error) {
     console.error("Error al insertar el documento:", error);
@@ -41,7 +43,7 @@ async function addUserCardToDB(uuid) {
     const database = client.db(config.mongodb.database);
     const collection = database.collection(config.mongodb.usersRegisterCollection);
 
-    const existingUser = await collection.findOne({ uuid });
+    const existingUser = await collection.findOne({ uuid: uuid});
 
     if (!existingUser) {
       const result = await collection.insertOne({ uuid });
@@ -62,14 +64,14 @@ async function verifyCard(uuid) {
     await client.connect();
     const database = client.db(config.mongodb.database);
     const registeredCollection = database.collection(config.mongodb.usersRegisterCollection);
-    const card = await registeredCollection.findOne({ uuid });
+    const card = await registeredCollection.findOne({ uuid: uuid });
     const verificationCollection = database.collection(config.mongodb.usersCollection);
 
     if (card) {
-      const existingVerification = await verificationCollection.findOne({ uuid });
+      const existingVerification = await verificationCollection.findOne({ uuid: uuid });
 
       if (!existingVerification) {
-        await verificationCollection.insertOne({ uuid });
+        await verificationCollection.insertOne({ uuid: uuid });
         return true;
       }
       return true; // Ya estaba verificado previamente.
