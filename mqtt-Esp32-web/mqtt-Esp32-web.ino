@@ -42,7 +42,6 @@ const char* password = "41umn05WLC";
 String lastUUID = ""; // Logica para evitar tener que manejar si agrego varias veces la tarjeta que no la agregue 30 veces en la db
 
 
-const char* mqtt_topic_addBook = "library/books";
 
 void setup() {
   Serial.begin(115200);
@@ -100,7 +99,7 @@ void loop() {
 
       // Topic with the result of the query with the current card.
       // MQTT_CLIENT.subscribe("library/usersVerification"); 
-      MQTT_CLIENT.subscribe(mqtt_topic_addBook); // Escucha lo que se publique en addBooks. 
+      MQTT_CLIENT.subscribe("library/books"); // Escucha lo que se publique en addBooks. 
 
       //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
       MQTT_CLIENT.publish("library/usersVerification", uuidCharArray); 
@@ -142,6 +141,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 // Función de callback para manejar los mensajes MQTT - ConfirmVerification
 void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Callback ejecutado");
+  
   Serial.print("Mensaje recibido [");
   Serial.print(topic);
   Serial.print("]: ");
@@ -196,9 +197,9 @@ void reconnect() {
     Serial.println("Intentando conectar con MQTT.");
     if(MQTT_CLIENT.connect("library")){
       Serial.println("Conectado a MQTT"); // Escribe cualquier nombre.
-        MQTT_CLIENT.subscribe("library/books");
-        MQTT_CLIENT.subscribe("library/confirmVerification");
-        MQTT_CLIENT.subscribe("library/myBooks");
+      MQTT_CLIENT.subscribe("library/books");
+      MQTT_CLIENT.subscribe("library/confirmVerification");
+      MQTT_CLIENT.subscribe("library/myBooks");
 
     } else{
       Serial.print("Error de conexión - Estado: ");
