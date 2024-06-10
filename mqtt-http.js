@@ -6,6 +6,7 @@ const config = require('./config');
 const { verifyCard } = require('./server'); // Importar la función verifyCard
 const WebSocket = require('ws');
 const { MongoClient } = require('mongodb');
+const {addBookToDB} = require('./server');
 
 // Configuración de mongoDB
 var mongoUri = 'mongodb://' + config.mongodb.hostname + ':' + config.mongodb.port + '/' + config.mongodb.database;
