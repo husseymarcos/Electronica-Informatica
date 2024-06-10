@@ -1,109 +1,80 @@
 // Importar las dependencias necesarias
 const { MongoClient } = require('mongodb');
 const mqtt = require("mqtt");
-var config = require('./config');
-const { mongo, connect } = require('mongoose');
+const config = require('./config');
 
 // Configuración de MongoDB
-
-// mongodb://172.31.90.101/library
-var mongoUri = 'mongodb://' + config.mongodb.hostname + ':' + config.mongodb.port + '/' + config.mongodb.database;
-
+const mongoUri = `mongodb://${config.mongodb.hostname}:${config.mongodb.port}/${config.mongodb.database}`;
 
 // Configuración de MQTT
-var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port;
+const mqttUri = `mqtt://${config.mqtt.hostname}:${config.mqtt.port}`;
 const mqttClient = mqtt.connect(mqttUri);
 
-
-
 // Función asíncrona para insertar un documento en MongoDB
-async function addBookToDB(message) { // Acá defino los datos que debe recibir la estructura del dato a agregar. Tiene que tener ese mismo formato
-  // Crear un nuevo cliente y conectar a MongoDB
+async function addBookToDB(message) {
   const client = new MongoClient(mongoUri);
-
   try {
     await client.connect();
-    // Conectar a la base de datos especificada en la configuración
     const database = client.db(config.mongodb.database);
     const collection = database.collection(config.mongodb.bookCollection);
 
-    // Crear un documento para insertar - Acá especifico que tipo de formato de dato tiene que recibir cuando este escuchando. 
-    const doc = {
-      content: message // Este message engloba toda la información del formato json, es decir title, author, etc.
-    };
+    const doc = JSON.parse(message);
+    const existingBook = await collection.findOne({ "content.title": doc.title });
 
-    // Verificar si ya existe un usuario con el mismo UUID
-    const existingBook = await collection.findOne(doc);
-
-    if(!existingBook){
-      // Insertar el documento en la colección
-      const result = await collection.insertOne(doc);
-      console.log(`El libro "${doc.content.title}" fue insertado`);
-      console.log(`Documento insertado con el _id: ${result.insertedId}`);
-    } else{
-      console.log(`El libro con título "${doc.content.title}" ya existe en la base de datos.`);
+    if (!existingBook) {
+      const result = await collection.insertOne({ content: doc });
+      console.log(`El libro "${doc.title}" fue insertado con el _id: ${result.insertedId}`);
+    } else {
+      console.log(`El libro con título "${doc.title}" ya existe en la base de datos.`);
     }
   } catch (error) {
     console.error("Error al insertar el documento:", error);
   } finally {
-    // Cerrar la conexión del cliente de MongoDB
     await client.close();
   }
 }
 
-
-// Agregar al usuario 
-async function addUserCardToDB(uuid) { // Acá defino los datos que debe recibir la estructura del dato a agregar. Tiene que tener ese mismo formato
-  // Crear un nuevo cliente y conectar a MongoDB
+async function addUserCardToDB(uuid) {
   const client = new MongoClient(mongoUri);
-
   try {
     await client.connect();
-    // Conectar a la base de datos especificada en la configuración
     const database = client.db(config.mongodb.database);
     const collection = database.collection(config.mongodb.usersRegisterCollection);
 
-    // Crear un documento para insertar - Acá especifico que tipo de formato de dato tiene que recibir cuando este escuchando. 
-    const doc = {
-      uuid: uuid // Este message engloba toda la información del formato json, uuid.
-    };
+    const existingUser = await collection.findOne({ uuid });
 
-    // Insertar el documento en la colección
-    const result = await collection.insertOne(doc);
-
-    // Imprimir el ID del documento insertado
-    console.log(`Documento insertado con el _id: ${result.insertedId}`);
+    if (!existingUser) {
+      const result = await collection.insertOne({ uuid });
+      console.log(`Usuario con UUID ${uuid} registrado con el _id: ${result.insertedId}`);
+    } else {
+      console.log(`El usuario con UUID ${uuid} ya existe en la base de datos.`);
+    }
   } catch (error) {
     console.error("Error al insertar el documento:", error);
   } finally {
-    // Cerrar la conexión del cliente de MongoDB
     await client.close();
   }
 }
 
-
-
-// Verificación de la tarjeta RFID
-async function verifyCard(uuid) { // Creo que por este lado ocurre el error de agregar 40 veces lo mismo
+async function verifyCard(uuid) {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
     const database = client.db(config.mongodb.database);
-    const collection = database.collection(config.mongodb.usersRegisterCollection); // Busca en la base de los usuarios registrados
-    const card = await collection.findOne({ uuid: uuid }); // Acá lo busca si lo encuentra.
-    const verificationCollections = database.collection(config.mongodb.usersCollection); // Creo que la colección de usuarios a verificar
-    
-    if(card != null){ // Si encuentra la carta, agrega eso, a la base de datos de usersCollection
-      const userData = {
-        uuid: uuid
+    const registeredCollection = database.collection(config.mongodb.usersRegisterCollection);
+    const card = await registeredCollection.findOne({ uuid });
+    const verificationCollection = database.collection(config.mongodb.usersCollection);
+
+    if (card) {
+      const existingVerification = await verificationCollection.findOne({ uuid });
+
+      if (!existingVerification) {
+        await verificationCollection.insertOne({ uuid });
+        return true;
       }
-      await verificationCollections.insertOne(userData); // Agregamos esa data de registro a la de verificación. De esta forma aseguramos que todo usuario registrado esté autorizado.
-      // const verifyUser = await verificationCollections.findOne(userData); // lo busca.
-      return card; // Si está true, en teoría está autorizado.
+      return true; // Ya estaba verificado previamente.
     }
-    else{
-      return false; // el usuario no existe y por tanto la lógica no se hace
-    }
+    return false;
   } catch (error) {
     console.error("Error verifying card:", error);
     return false;
@@ -112,171 +83,103 @@ async function verifyCard(uuid) { // Creo que por este lado ocurre el error de a
   }
 }
 
-
-// Solicitud de un libro
-async function requestBook(bookId){
+async function requestBook(bookId) {
   const client = new MongoClient(mongoUri);
-
-  try{
+  try {
     await client.connect();
     const database = client.db(config.mongodb.database);
-    const collection = database.collection(config.mongodb.bookCollection); // Libros que ya están agregados
-    const book = await collection.findOne({_id : bookId}); 
-    const requestCollection = database.collection(config.mongodb.bookRequestCollection); // Coleccion de libros a solicitar
+    const bookCollection = database.collection(config.mongodb.bookCollection);
+    const book = await bookCollection.findOne({ _id: bookId });
 
-    const myBooks = database.collection(config.mongodb.myBooksCollection); // Traigo la colección de "mis libros"
-    if(book != null){
-      const bookData = {
-        _id: bookId
+    if (book) {
+      const requestCollection = database.collection(config.mongodb.bookRequestCollection);
+      const myBooksCollection = database.collection(config.mongodb.myBooksCollection);
+
+      const existingRequest = await requestCollection.findOne({ _id: bookId });
+
+      if (!existingRequest) {
+        await requestCollection.insertOne({ _id: bookId });
+        await myBooksCollection.insertOne({ _id: bookId });
+        return true;
       }
-      await requestCollection.insertOne(bookData); // Agrego la información del libro que quiero solicitar, para luego poder solicitarlo. 
-      // const requestedBook = await requestCollection.findOne(bookData); // Busco el libro que fue solicitado en esa colección.
-
-      // Agrego esa información a la colección de myBooks
-      await myBooks.insertOne(bookData);
-
-      return book; // Si es true, quiere decir que el libro que solicitaste está disponible
-    } else{
-      return false; // El libro no se encontró, porque ni siquiera está en la colección de libros agregados.
+      return false; // Ya estaba solicitado previamente.
     }
-  } catch(error){
+    return false; // El libro no se encontró.
+  } catch (error) {
     console.error("Error requesting book:", error);
     return 'error';
-  } finally{
+  } finally {
     await client.close();
   }
 }
 
-async function confirmVerification(successMsg){
+async function confirmVerification(successMsg) {
   const client = new MongoClient(mongoUri);
-  try{
+  try {
     await client.connect();
     const database = client.db(config.mongodb.database);
     const collection = database.collection(config.mongodb.confirmVerificationCollection);
 
-    const doc = {
-      success: successMsg
-    }
-
-    await collection.insertOne(doc);
-
-  } catch(error){
+    await collection.insertOne({ success: successMsg });
+  } catch (error) {
     console.error("Error al insertar el documento:", error);
-  } finally{
+  } finally {
     await client.close();
   }
-
 }
 
-// Conectar al broker MQTT y suscribirse a los tópicos -> Este escucha toda la información que se va ir publicando. Luego esa información la sube a la db
 mqttClient.on("connect", () => {
-  mqttClient.subscribe("library/books", (err) => { // con el + indico que quiero que se suscriba a todos. Si en lugar de + especifico uno particular, evidentemente va a escuchar solo ese topic.
-    if (!err) {
-      console.log("Cliente conectado y suscrito al tópico library/books");
-    } else {
-      console.error("Error al suscribirse al tópico library/books:", err);
-    }
-  });
+  const topics = [
+    "library/books",
+    "library/registerUsers",
+    "library/usersVerification",
+    "library/bookRequests/#",
+    "library/myBooks"
+  ];
 
-  mqttClient.subscribe("library/registerUsers", (err) =>{
-    if (!err) {
-      console.log("Connected and subscribed to topic library/registerUsers");
-    } else {
-      console.error("Error subscribing to topic library/registerUsers:", err);
-    }
-  })
-
-  mqttClient.subscribe("library/usersVerification", (err) => {
+  topics.forEach(topic => {
+    mqttClient.subscribe(topic, (err) => {
       if (!err) {
-        console.log("Connected and subscribed to topic library/usersVerification");
+        console.log(`Connected and subscribed to topic ${topic}`);
       } else {
-        console.error("Error subscribing to topic library/usersVerification:", err);
+        console.error(`Error subscribing to topic ${topic}:`, err);
       }
+    });
   });
-
-  mqttClient.subscribe("library/bookRequests/#", (err) =>{
-    if(!err){
-      console.log("Connected and subscribed to topic library/bookRequests/#");
-    } else{
-      console.error("Error subscribing to topic library/bookRequests/#", err);
-    }
-
-  });
-
-  mqttClient.subscribe("library/myBooks", (err) =>{
-    if(!err){
-      console.log("Connected and subscribed to topic library/myBooks");
-    } else{
-      console.error("Error subscribing to topic library/myBooks", err);
-    }
-
-  });
-  
 });
 
-
-
-
-// Manejar los mensajes recibidos en los tópicos 
 mqttClient.on("message", async (topic, message) => {
-  if(topic === "library/books"){
-    const messageString = message.toString();
-    console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
+  const messageString = message.toString();
+  console.log(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
+
+  if (topic === "library/books") {
     addBookToDB(messageString).catch(console.dir);
-    mqttClient.publish("library/books",`Received message on topic ${topic}: ${message}`);
+  }
 
-  } 
-
-  // Registra al usuario 
-  if(topic === "library/registerUsers"){
-    console.log(`Received message on topic ${topic}: ${message}`);
-    const uuid = message.toString();
-    console.log(`Mensaje recibido en el tópico ${topic}: ${uuid}`);
+  if (topic === "library/registerUsers") {
+    const uuid = messageString;
     addUserCardToDB(uuid).catch(console.dir);
   }
-  
-  // Verifica el estado del usuario
+
   if (topic === "library/usersVerification") {
-    console.log(`Received message on topic ${topic}: ${message}`);
-    const uuid = message.toString();
+    const uuid = messageString;
     const isAuthorized = await verifyCard(uuid);
     const responseTopic = `library/usersVerification/${uuid}`;
     mqttClient.publish(responseTopic, isAuthorized ? "authorized" : "unauthorized");
-    console.log(`Card with UUID ${uuid} is ${isAuthorized ? "authorized" : "unauthorized"}`);
-    mqttClient.publish("library/usersVerification", `Received message on topic ${topic}: ${message}`);
-
-    // Publicar confirmación en el topic adecuado - Vinculación con el ESP32 
     if (isAuthorized) {
-      confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
-      // Publicar en el topic de confirmación - Comunicación con ESP32 
+      confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`).catch(console.dir);
       mqttClient.publish('library/confirmVerification', `Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
     }
   }
 
-  // Manejar las solicitudes de libros
-  if(topic.startsWith("library/bookRequests/")){
-    console.log(`Received message on topic ${topic}: ${message}`); // Si puedo ver el mensaje acá luego puedo realizar la lógica de agregarlo a mi db de myBooks.
-    const bookId = topic.split('/').pop().toString();
+  if (topic.startsWith("library/bookRequests/")) {
+    const bookId = topic.split('/').pop();
     const status = await requestBook(bookId);
     const responseTopic = `library/bookRequests/${bookId}`;
-    mqttClient.publish(responseTopic, status);
-    mqttClient.publish("library/myBooks", `Book with ID ${bookId} is ${status}`);
-    console.log(`Book with ID ${bookId} is ${status}`);
+    mqttClient.publish(responseTopic, status ? "success" : "fail");
   }
 });
 
-  
-
-
-/*Si queres eliminar un archivo, por ejemplo, si queres hacerlo desde MQTT Explorer
-podes hacerlo sí:
-{
-  content.title = "El principito"
-}
-
-Te elimina el doc que tenga de title "El principito"
-*/ 
-
 module.exports = {
   addBookToDB
-}
+};
