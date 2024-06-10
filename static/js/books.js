@@ -14,8 +14,7 @@ function fetchAllBooks() {
             booksList.innerHTML = '';
 
             books.forEach(book => {
-
-                const content = JSON.parse(book.content);
+                const content = book.content; // Access the content object directly
 
                 const listItem = document.createElement('li');
                 listItem.innerHTML = `
@@ -34,6 +33,7 @@ function fetchAllBooks() {
             messageElement.innerText = "Error al cargar la lista de libros. Por favor, intenta nuevamente más tarde.";
         });
 }
+
 
 // Function to request a book
 function requestBook(bookId) {
