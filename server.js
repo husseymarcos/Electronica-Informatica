@@ -256,4 +256,6 @@ podes hacerlo sí:
 Te elimina el doc que tenga de title "El principito"
 */ 
 
-
+module.exports = {
+  addBookToDB
+}
