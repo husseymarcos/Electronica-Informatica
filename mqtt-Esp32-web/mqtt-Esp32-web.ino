@@ -71,6 +71,8 @@ void setup() {
   MQTT_CLIENT.setServer("54.196.112.249", 1883);  // public IP
   MQTT_CLIENT.setCallback(callback);
 
+  MQTT_CLIENT.publish("library/usersVerification", uuidCharArray);
+
 
 }
 
@@ -101,9 +103,8 @@ void loop() {
       // MQTT_CLIENT.subscribe("library/usersVerification"); 
       // MQTT_CLIENT.subscribe("library/books"); // Escucha lo que se publique en addBooks. 
 
-      //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
-      MQTT_CLIENT.publish("library/usersVerification", uuidCharArray); 
-    
+      //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray); 
+
       lastUUID = uuid;
     }
     
