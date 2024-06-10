@@ -174,6 +174,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println(year);
 
   }
+
+  if (String(topic) == "library/usersVerification") {
+    Serial.println("Ingreso a LibrosExpress realizado.");
+  }
   if (String(topic) == "library/confirmVerification") {
     Serial.println("Ingreso a LibrosExpress realizado.");
   }
@@ -197,9 +201,23 @@ void reconnect() {
     Serial.println("Intentando conectar con MQTT.");
     if(MQTT_CLIENT.connect("ESP32Client")){
       Serial.println("Conectado a MQTT"); // Escribe cualquier nombre.
-      MQTT_CLIENT.subscribe("library/books");
-      MQTT_CLIENT.subscribe("library/confirmVerification");
-      MQTT_CLIENT.subscribe("library/myBooks");
+
+      if(MQTT_CLIENT.subscribe("library/books")){
+        Serial.print("Estoy suscripto a library/books");
+      }
+
+      if(MQTT_CLIENT.subscribe("library/usersVerification")){
+        Serial.print("Estoy suscripto a library/usersVerification");
+      }
+      
+      if(MQTT_CLIENT.subscribe("library/confirmVerification"))){
+        Serial.print("Estoy suscripto a library/confirmVerification");
+      }
+
+      if(MQTT_CLIENT.subscribe("library/myBooks")){
+        Serial.print("Estoy suscripto a library/myBooks");
+      }
+      
 
     } else{
       Serial.print("Error de conexión - Estado: ");
