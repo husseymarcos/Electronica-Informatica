@@ -38,10 +38,10 @@ async function addBookToDB(message) { // Acá defino los datos que debe recibir 
     if(!existingBook){
       // Insertar el documento en la colección
       const result = await collection.insertOne(doc);
-      console.log(`El libro "${content.title}" fue insertado`);
+      console.log(`El libro "${doc.content.title}" fue insertado`);
       console.log(`Documento insertado con el _id: ${result.insertedId}`);
     } else{
-      console.log(`El libro con título "${content.title}" ya existe en la base de datos.`);
+      console.log(`El libro con título "${doc.content.title}" ya existe en la base de datos.`);
     }
   } catch (error) {
     console.error("Error al insertar el documento:", error);
