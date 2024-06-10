@@ -145,13 +145,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
   deserializeJson(doc, payload, length);
 
   if(String(topic) == "library/books"){
-    const char* = title = doc("title");
-    const char* = author = doc("author");
+    const char* title = doc("title");
+    const char* author = doc("author");
     int year = doc("year");
 
     Serial.print("Title: ");
     Serial.println(title);
-    
+
   }
   if (String(topic) == "library/confirmVerification") {
     Serial.println("Ingreso a LibrosExpress realizado.");
@@ -178,11 +178,15 @@ void reconnect() {
     Serial.println("Intentando conectar con MQTT.");
     if(MQTT_CLIENT.connect("library")){
       Serial.println("Conectado a MQTT"); // Escribe cualquier nombre.
+        MQTT_CLIENT.suscribe("library/books");
         if (MQTT_CLIENT.subscribe("library/confirmVerification")) {
          Serial.println("Suscripción a library/confirmVerification realizada con éxito");
         } else {
           Serial.println("Error al suscribirse a library/confirmVerification");
         }
+        
+
+
     } else{
       Serial.print("Error de conexión - Estado: ");
       Serial.println(MQTT_CLIENT.state());
