@@ -156,11 +156,13 @@ mqttClient.on("message", async (topic, message) => {
 
   if (topic === "library/books") {
     addBookToDB(messageString).catch(console.dir);
+    mqttClient.publish(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
   }
 
   if (topic === "library/registerUsers") {
     const uuid = messageString;
     addUserCardToDB(uuid).catch(console.dir);
+    mqttClient.publish(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
   }
 
   if (topic === "library/usersVerification") {
