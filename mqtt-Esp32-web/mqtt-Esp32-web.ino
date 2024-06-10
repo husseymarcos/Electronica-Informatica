@@ -85,13 +85,13 @@ void loop() {
       char uuidCharArray[10];
       uuid.toCharArray(uuidCharArray, 10);
 
-      //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
+      MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
 
       // Topic with the result of the query with the current card.
       // MQTT_CLIENT.subscribe("library/usersVerification"); 
 
       //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray);
-      MQTT_CLIENT.publish("library/usersVerification", uuidCharArray); 
+      //MQTT_CLIENT.publish("library/usersVerification", uuidCharArray); 
     
       lastUUID = uuid;
     }
