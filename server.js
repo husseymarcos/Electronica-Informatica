@@ -70,12 +70,9 @@ async function verifyCard(uuid) {
     if(!card){
       const existingVerification = await verificationCollection.findOne({ uuid: uuid });
 
-      if (!existingVerification) {
+      if (!existingVerification) { // Si no existe lo agrega
         await verificationCollection.insertOne({ uuid: uuid });
         return true;
-      } else {
-        console.log(`El usuario con UUID ${uuid} ya existe en la base de datos.`);
-        return true; // Si ya existe, retorna true porque significa que el verificado es correcto.
       }
     } else{
       console.log(`El usuario con UUID ${uuid} ya existe en la base de datos.`);
@@ -169,15 +166,23 @@ mqttClient.on("message", async (topic, message) => {
     mqttClient.publish(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
   }
 
-  if (topic === "library/usersVerification") {
+  if (topic === "library/usersVerification") { // To Do
     const uuid = messageString;
     const isAuthorized = await verifyCard(uuid);
     const responseTopic = `library/usersVerification/${uuid}`;
+    console.log("Topic actual: ", responseTopic);
     mqttClient.publish(responseTopic, isAuthorized ? "authorized" : "unauthorized");
+
+    console.log("Acabo de realizar un publish con el estado de si esta autorizado o no");
+    console.log("Estado Actual: ", isAuthorized);
+
     if (isAuthorized) {
       confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`).catch(console.dir);
       mqttClient.publish('library/confirmVerification', `Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
+      
+      console.log(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
     }
+    console.log("El isAuthorized dio true");
   }
 
   if (topic.startsWith("library/bookRequests/")) {
