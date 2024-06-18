@@ -36,8 +36,8 @@ PubSubClient MQTT_CLIENT;
 MFRC522 mfrc522(SS_PIN, RST_PIN); 
 
 // Nombre y contraseña de tu red WiFi.
-const char* ssid = "UA-Alumnos";
-const char* password = "41umn05WLC";
+const char* ssid = "Telecentro-40fe";
+const char* password = "898PHFSD88L7";
 
 String lastUUID = ""; // Logica para evitar tener que manejar si agrego varias veces la tarjeta que no la agregue 30 veces en la db
 
@@ -68,7 +68,7 @@ void setup() {
 
 
   MQTT_CLIENT.setClient(WIFI_CLIENT);
-  MQTT_CLIENT.setServer("54.196.112.249", 1883);  // public IP
+  MQTT_CLIENT.setServer("54.87.96.253", 1883);  // public IP
   MQTT_CLIENT.setCallback(callback);
 
 
@@ -105,6 +105,14 @@ void loop() {
       //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray); 
       MQTT_CLIENT.publish("library/usersVerification", uuidCharArray);
 
+      // Considero que acá deben estar la lógica de subscripción a los topics
+      MQTT_CLIENT.subscribe("library/books"); 
+
+      MQTT_CLIENT.subscribe("library/confirmVerification");
+
+      MQTT_CLIENT.subscribe("library/myBooks");
+      
+  
       lastUUID = uuid;
     }
     
@@ -167,6 +175,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
     const char* author = doc["author"];
     int year = doc["year"];
 
+    // Genre falta
+
     Serial.print("Title: ");
     Serial.println(title);
     Serial.print("Author: ");
@@ -204,19 +214,19 @@ void reconnect() {
       Serial.println("Conectado a MQTT"); // Escribe cualquier nombre.
 
       if(MQTT_CLIENT.subscribe("library/books")){
-        Serial.print("Estoy suscripto a library/books");
+        Serial.println("Estoy suscripto a library/books");
       }
 
       if(MQTT_CLIENT.subscribe("library/usersVerification")){
-        Serial.print("Estoy suscripto a library/usersVerification");
+        Serial.println("Estoy suscripto a library/usersVerification");
       }
       
       if(MQTT_CLIENT.subscribe("library/confirmVerification")){
-        Serial.print("Estoy suscripto a library/confirmVerification");
+        Serial.println("Estoy suscripto a library/confirmVerification");
       }
 
       if(MQTT_CLIENT.subscribe("library/myBooks")){
-        Serial.print("Estoy suscripto a library/myBooks");
+        Serial.println("Estoy suscripto a library/myBooks");
       }
       
 
