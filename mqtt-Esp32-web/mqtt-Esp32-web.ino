@@ -71,8 +71,6 @@ void setup() {
   MQTT_CLIENT.setServer("54.87.96.253", 1883);  // public IP
   MQTT_CLIENT.setCallback(callback);
 
-
-
 }
 
 void loop() {
@@ -103,26 +101,25 @@ void loop() {
       // MQTT_CLIENT.subscribe("library/books"); // Escucha lo que se publique en addBooks. 
 
       //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray); 
-      MQTT_CLIENT.publish("library/usersVerification", uuidCharArray);
+      MQTT_CLIENT.publish("library/usersVerification", uuidCharArray); // --> Considero que acá está el error. Debo ver una forma, de que solo lo haga una vez por cada tarjeta y no todo el tiempo. 
 
-      // Considero que acá deben estar la lógica de subscripción a los topics
-      MQTT_CLIENT.subscribe("library/books"); 
-
-      MQTT_CLIENT.subscribe("library/confirmVerification");
-
-      MQTT_CLIENT.subscribe("library/myBooks");
-      
-  
       lastUUID = uuid;
     }
-    
-    
+  
     // Parte de la comunicación desde la pagina web
     // MQTT_CLIENT.setCallback(callback);
     
     mfrc522.PICC_HaltA(); // Detenemos la comunicación con la tarjeta RFID
     mfrc522.PCD_StopCrypto1(); // Detenemos la encriptación
   }
+
+  // Considero que acá deben estar la lógica de subscripción a los topics - Me interesa que estén en un loop. "escuchan" todo el tiempo!
+  MQTT_CLIENT.subscribe("library/books"); 
+
+  MQTT_CLIENT.subscribe("library/confirmVerification");
+
+  MQTT_CLIENT.subscribe("library/myBooks");
+
   delay(2000);
 }
 
@@ -213,7 +210,7 @@ void reconnect() {
     if(MQTT_CLIENT.connect("ESP32Client")){
       Serial.println("Conectado a MQTT"); // Escribe cualquier nombre.
 
-      if(MQTT_CLIENT.subscribe("library/books")){
+      /*if(MQTT_CLIENT.subscribe("library/books")){
         Serial.println("Estoy suscripto a library/books");
       }
 
@@ -227,7 +224,7 @@ void reconnect() {
 
       if(MQTT_CLIENT.subscribe("library/myBooks")){
         Serial.println("Estoy suscripto a library/myBooks");
-      }
+      }*/
       
 
     } else{
