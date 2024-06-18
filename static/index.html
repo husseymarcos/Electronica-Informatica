@@ -30,6 +30,7 @@
       const data = JSON.parse(event.data);
 
       if (data.topic.startsWith('library/usersVerification/')) {
+        console.log("llegue a library/usersVerification/")
         // Extract UUID from the topic
         const uuid = data.topic.split('/').pop();
         verifyCard(uuid);
