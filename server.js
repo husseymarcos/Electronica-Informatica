@@ -116,14 +116,21 @@ async function requestBook(bookId) {
   }
 }
 
+
+// FIXME: ConfirmVerification provoca un loop impresionante. Hay que corregir eso
 async function confirmVerification(successMsg) {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
     const database = client.db(config.mongodb.database);
     const collection = database.collection(config.mongodb.confirmVerificationCollection);
+    const existingConfirmVerification = await confirmVerificationCollection.findOne({success: successMsg});
 
-    await collection.insertOne({ success: successMsg });
+    if(!existingConfirmVerification){ // Si no encuentra ese mensaje en la collection, lo agrega
+      await collection.insertOne({ success: successMsg });
+    } else{ // si el mensaje ya existe, informa que la verificación ya fue hecha. No inserta más nada.
+      console.log("Se ha confirmado tu verificación, bienvenido!");
+    }    
   } catch (error) {
     console.error("Error al insertar el documento:", error);
   } finally {
@@ -166,7 +173,7 @@ mqttClient.on("message", async (topic, message) => {
     mqttClient.publish(`Mensaje recibido en el tópico ${topic}: ${messageString}`);
   }
 
-  if (topic === "library/usersVerification") { // To Do
+  if (topic === "library/usersVerification") { 
     const uuid = messageString;
     const isAuthorized = await verifyCard(uuid);
     const responseTopic = `library/usersVerification/${uuid}`;
@@ -176,6 +183,10 @@ mqttClient.on("message", async (topic, message) => {
     console.log("Acabo de realizar un publish con el estado de si esta autorizado o no");
     console.log("Estado Actual: ", isAuthorized);
 
+
+    // FIXME: Es probable que acá también se produzca un error. Debido a que siempre hace el publish en confirm verification
+    // Quizá una forma viable de poder evitar eso, es usar true y false, si es true lo hace como si fuera la primera vez, y sino ya está no hace nada.
+    // TODO: Ver que carajo hace si ya está previamente autorizado.
     if (isAuthorized) {
       confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`).catch(console.dir);
       mqttClient.publish('library/confirmVerification', `Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
