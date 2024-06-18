@@ -78,7 +78,8 @@ async function verifyCard(uuid) {
         return true; // Si ya existe, retorna true porque significa que el verificado es correcto.
       }
     } else{
-      return false;
+      console.log(`El usuario con UUID ${uuid} ya existe en la base de datos.`);
+      return true; 
     }
   } catch (error) {
     console.error("Error verifying card:", error);
