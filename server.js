@@ -128,6 +128,7 @@ async function confirmVerification(successMsg) {
 
     if(!existingConfirmVerification){ // Si no encuentra ese mensaje en la collection, lo agrega
       await collection.insertOne({ success: successMsg });
+      mqttClient.publish('library/confirmVerification', successMsg);
     } else{ // si el mensaje ya existe, informa que la verificación ya fue hecha. No inserta más nada.
       console.log("Se ha confirmado tu verificación, bienvenido!");
     }    
@@ -189,8 +190,6 @@ mqttClient.on("message", async (topic, message) => {
     // TODO: Ver que carajo hace si ya está previamente autorizado.
     if (isAuthorized) {
       confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`).catch(console.dir);
-      mqttClient.publish('library/confirmVerification', `Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
-      
       console.log(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
     }
     console.log("El isAuthorized dio true");
