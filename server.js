@@ -128,7 +128,7 @@ async function confirmVerification(successMsg) {
 
     if(!existingConfirmVerification){ // Si no encuentra ese mensaje en la collection, lo agrega
       await collection.insertOne({ success: successMsg });
-      mqttClient.publish('library/confirmVerification', successMsg);
+      mqttClient.publish('library/confirmVerification', successMsg); // FIXME: Esto estará bien acá? No entiendo :/
     } else{ // si el mensaje ya existe, informa que la verificación ya fue hecha. No inserta más nada.
       console.log("Se ha confirmado tu verificación, bienvenido!");
     }    
