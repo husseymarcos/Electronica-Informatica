@@ -67,16 +67,19 @@ async function verifyCard(uuid) {
     const card = await registeredCollection.findOne({ uuid: uuid });
     const verificationCollection = database.collection(config.mongodb.usersCollection);
 
-    if (card) {
+    if(!card){
       const existingVerification = await verificationCollection.findOne({ uuid: uuid });
 
       if (!existingVerification) {
         await verificationCollection.insertOne({ uuid: uuid });
         return true;
+      } else {
+        console.log(`El usuario con UUID ${uuid} ya existe en la base de datos.`);
+        return true; // Si ya existe, retorna true porque significa que el verificado es correcto.
       }
-      return true; // Ya estaba verificado previamente.
+    } else{
+      return false;
     }
-    return false;
   } catch (error) {
     console.error("Error verifying card:", error);
     return false;
