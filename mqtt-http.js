@@ -31,6 +31,7 @@ const pendingRequests = new Map();
 
 // Suscribirse al tópico de respuesta cuando se conecta al servidor MQTT
 mqttClient.on('connect', () => {
+  
   mqttClient.subscribe('library/usersVerification/#', (err) => {
     if (!err) {
       console.log('Suscrito a library/usersVerification/#');
