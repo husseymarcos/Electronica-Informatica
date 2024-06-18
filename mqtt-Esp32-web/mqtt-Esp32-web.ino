@@ -69,8 +69,7 @@ void setup() {
 
   MQTT_CLIENT.setClient(WIFI_CLIENT);
   MQTT_CLIENT.setServer("54.87.96.253", 1883);  // public IP
-  MQTT_CLIENT.setCallback(callback);
-
+  
 }
 
 void loop() {
@@ -120,6 +119,8 @@ void loop() {
 
   MQTT_CLIENT.subscribe("library/myBooks");
 
+  
+  MQTT_CLIENT.setCallback(callback);
   delay(2000);
 }
 
