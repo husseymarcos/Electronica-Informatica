@@ -19,6 +19,8 @@
   <script>
     const ws = new WebSocket('ws://' + window.location.host);
 
+    console.log(window.location.host);
+
     ws.onopen = () => {
       console.log('Conectado al servidor WebSocket');
     };
