@@ -17,34 +17,21 @@
   </div>
 
   <script>
-    console.log('Host: ', window.location.host);
-
-    const wsUrl = 'ws://' + window.location.host;
-
-    console.log('WebSocket URL:', wsUrl);
-    const ws = new WebSocket(wsUrl);
-    
+    const ws = new WebSocket('ws://' + window.location.host);
 
     ws.onopen = () => {
       console.log('Conectado al servidor WebSocket');
     };
 
     ws.onmessage = (event) => {
-      console.log(event);
       console.log('Mensaje recibido del servidor WebSocket:', event.data);
       const data = JSON.parse(event.data);
 
-      console.log(data);
-
-
       if (data.topic.startsWith('library/usersVerification/')) {
-        console.log("llegue a library/usersVerification/")
         // Extract UUID from the topic
         const uuid = data.topic.split('/').pop();
         verifyCard(uuid);
       }
-
-      console.log("Ya ejecute verifyCard");
     };
 
     ws.onclose = () => {
