@@ -124,7 +124,7 @@ async function confirmVerification(successMsg) {
     await client.connect();
     const database = client.db(config.mongodb.database);
     const collection = database.collection(config.mongodb.confirmVerificationCollection);
-    const existingConfirmVerification = await confirmVerificationCollection.findOne({success: successMsg});
+    const existingConfirmVerification = await collection.findOne({success: successMsg});
 
     if(!existingConfirmVerification){ // Si no encuentra ese mensaje en la collection, lo agrega
       await collection.insertOne({ success: successMsg });
