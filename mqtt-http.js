@@ -112,7 +112,7 @@ app.post('/api/rfid/verification', async (req, res) => {
     if (err) {
       console.error("Error al publicar en MQTT:", err);
       res.status(500).send("Error al verificar la tarjeta.");
-      // pendingVerifications.delete(responseTopic);
+      pendingVerifications.delete(responseTopic);
     }
   });
 
