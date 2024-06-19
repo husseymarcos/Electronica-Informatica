@@ -95,24 +95,24 @@ app.post('/api/books/publish', (req, res) => {
 app.get('/api/rfid/verification', async (req, res) => {
   console.log("llegué a hacer algo en /api/rfid/verification");
   const { uuid } = req.query;
-  const responseTopic = `library/usersVerification/${uuid}`;
+  // const responseTopic = `library/usersVerification/${uuid}`;
   
 
   // Verificar si ya hay una promesa pendiente para esta UUID
-  if (pendingVerifications.has(responseTopic)) {
-    return res.status(429).send("Verification already in progress.");
-  }
+  //if (pendingVerifications.has(responseTopic)) {
+    //return res.status(429).send("Verification already in progress.");
+  //}
 
-  const verificationPromise = new Promise((resolve, reject) => {
-    pendingVerifications.set(responseTopic, { resolve, reject });
-  });
+  //const verificationPromise = new Promise((resolve, reject) => {
+    //pendingVerifications.set(responseTopic, { resolve, reject });
+  //});
 
   mqttClient.publish('library/usersVerification', uuid, (err) => { // Es lo mismo que tener library/usersVerification acá publica el uuid.
     console.log("Estoy ejecutando la publicación en el topic library/usersVerification");
     if (err) {
       console.error("Error al publicar en MQTT:", err);
       res.status(500).send("Error al verificar la tarjeta.");
-      pendingVerifications.delete(responseTopic);
+      // pendingVerifications.delete(responseTopic);
     }
   });
 
