@@ -93,13 +93,14 @@ app.post('/api/books/publish', (req, res) => {
 
 // Fijate de donde podría salir el uuid. 
 // Ruta para verificación del RFID
-app.get(`/api/rfid/verification?uuid=${uuid}`, async (req, res) => {
+app.get(`/api/rfid/verification?uuid=${uuid}`, async (req, res) => { // FIXME: Anda mal! :(. 
+  // TODO: Que chequee en la base de datos. Manda al topic confirmVerification. Volver a realizar esta lógica. 
   console.log("llegué a hacer algo en /api/rfid/verification");
   const { uuid } = req.query;
   console.log("UUID: ", uuid);
   const responseTopic = `library/usersVerification/${uuid}`;
   
-
+  
   // Verificar si ya hay una promesa pendiente para esta UUID
   if (pendingVerifications.has(responseTopic)) {
     return res.status(429).send("Verification already in progress.");
