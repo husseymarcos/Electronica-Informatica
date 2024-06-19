@@ -36,8 +36,8 @@ PubSubClient MQTT_CLIENT;
 MFRC522 mfrc522(SS_PIN, RST_PIN); 
 
 // Nombre y contraseña de tu red WiFi.
-const char* ssid = "Telecentro-40fe";
-const char* password = "898PHFSD88L7";
+const char* ssid = "UA-Alumnos";
+const char* password = "41umn05WLC";
 
 String lastUUID = ""; 
 
@@ -64,12 +64,7 @@ void setup() {
   Serial.println("WiFi conectado.");
   Serial.println("IP: ");
   Serial.println(WiFi.localIP());
-
-
-
-  MQTT_CLIENT.setClient(WIFI_CLIENT);
-  MQTT_CLIENT.setServer("100.29.7.4", 1883);  // public IP
-  
+  MQTT_CLIENT.setCallback(callback);
 }
 
 void loop() {
@@ -101,6 +96,7 @@ void loop() {
 
       //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray); 
       MQTT_CLIENT.publish("library/usersVerification", uuidCharArray); // --> Considero que acá está el error. Debo ver una forma, de que solo lo haga una vez por cada tarjeta y no todo el tiempo. 
+      Serial.println("Mensaje enviado al topic library/usersVerification. ");
 
       lastUUID = uuid;
     }
@@ -112,15 +108,8 @@ void loop() {
     mfrc522.PCD_StopCrypto1(); // Detenemos la encriptación
   }
 
-  // Considero que acá deben estar la lógica de subscripción a los topics - Me interesa que estén en un loop. "escuchan" todo el tiempo!
-  MQTT_CLIENT.subscribe("library/books"); 
-
-  MQTT_CLIENT.subscribe("library/confirmVerification");
-
-  MQTT_CLIENT.subscribe("library/myBooks");
-
+  MQTT_CLIENT.loop();
   
-  MQTT_CLIENT.setCallback(callback);
   delay(2000);
 }
 
@@ -204,6 +193,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
 // Reconecta con MQTT broker
 void reconnect() {
   // MQTT_CLIENT.setServer("192.168.1.206", 1883); // si uso un servidor local <ver IP correcta>
+
+  MQTT_CLIENT.setClient(WIFI_CLIENT);
+  MQTT_CLIENT.setServer("54.80.59.88", 1883);  // public IP
   
   // Intentando conectar con el broker.
   while (!MQTT_CLIENT.connected()) {
@@ -211,7 +203,7 @@ void reconnect() {
     if(MQTT_CLIENT.connect("ESP32Client")){
       Serial.println("Conectado a MQTT"); // Escribe cualquier nombre.
 
-      /*if(MQTT_CLIENT.subscribe("library/books")){
+      if(MQTT_CLIENT.subscribe("library/books")){
         Serial.println("Estoy suscripto a library/books");
       }
 
@@ -225,7 +217,7 @@ void reconnect() {
 
       if(MQTT_CLIENT.subscribe("library/myBooks")){
         Serial.println("Estoy suscripto a library/myBooks");
-      }*/
+      }
       
 
     } else{
