@@ -92,7 +92,7 @@ app.post('/api/books/publish', (req, res) => {
 });
 
 // Ruta para verificación del RFID
-/*app.get('/api/rfid/verification', async (req, res) => {
+app.post('/api/rfid/verification', async (req, res) => {
   console.log("llegué a hacer algo en /api/rfid/verification");
   const { uuid } = req.query;
   const responseTopic = `library/usersVerification/${uuid}`;
@@ -135,64 +135,9 @@ app.post('/api/books/publish', (req, res) => {
   } finally {
     pendingVerifications.delete(responseTopic);
   }
-});*/
-
-
-// Ruta para verificación del RFID - 
-app.get('/api/rfid/verification', async (req, res) => {
-  console.log("llegué a hacer algo en /api/rfid/verification");
-  const { uuid } = req.query;
-  const responseTopic = `library/usersVerification/${uuid}`;
-  
-  // Verificar si ya hay una promesa pendiente para esta UUID
-  if (pendingVerifications.has(responseTopic)) {
-    return res.status(429).send("Verification already in progress.");
-  }
-
-  // Configurar temporizador de tiempo de espera
-  const timeout = setTimeout(() => {
-    if (pendingVerifications.has(responseTopic)) {
-      const { reject } = pendingVerifications.get(responseTopic);
-      reject(new Error('Verification timed out'));
-      pendingVerifications.delete(responseTopic);
-      console.log(`Verificación de ${responseTopic} ha expirado`);
-    }
-  }, 10000); // Tiempo de espera de 10 segundos (ajustable)
-
-  const verificationPromise = new Promise((resolve, reject) => {
-    pendingVerifications.set(responseTopic, { resolve, reject, timeout });
-  });
-
-  mqttClient.publish('library/usersVerification', uuid, (err) => { // Es lo mismo que tener library/usersVerification acá publica el uuid.
-    console.log("Estoy ejecutando la publicación en el topic library/usersVerification");
-    if (err) {
-      console.error("Error al publicar en MQTT:", err);
-      res.status(500).send("Error al verificar la tarjeta.");
-      pendingVerifications.delete(responseTopic);
-      clearTimeout(timeout);
-    }
-  });
-
-  try {
-    const status = await verificationPromise;
-    if (status === 'authorized') {
-      // Send response indicating success
-      res.json({ status: 'success', message: 'authorized' });
-      console.log("publique la res");
-      // Publicar en el topic de confirmación - Comunicación con ESP32 
-      mqttClient.publish('library/confirmVerification', `Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
-      // si te lo llega a agregar 2 veces, fijate de manejarlo con el topic 
- 
-    } else {
-      res.status(403).json({ status: 'error', message: 'unauthorized' });
-    }
-  } catch (error) {
-    res.status(500).send("Error al verificar la tarjeta.");
-  } finally {
-    pendingVerifications.delete(responseTopic);
-    clearTimeout(timeout);
-  }
 });
+
+
 
 
 
