@@ -128,7 +128,7 @@ async function confirmVerification(successMsg) {
 
     if(!existingConfirmVerification){ // Si no encuentra ese mensaje en la collection, lo agrega
       await collection.insertOne({ success: successMsg });
-      mqttClient.publish('library/confirmVerification', successMsg); // FIXME: Esto estará bien acá? No entiendo :/
+      // mqttClient.publish('library/confirmVerification', successMsg); // FIXME: Esto estará bien acá? No entiendo :/
     } else{ // si el mensaje ya existe, informa que la verificación ya fue hecha. No inserta más nada.
       console.log("Se ha confirmado tu verificación, bienvenido!");
     }    
@@ -177,12 +177,12 @@ mqttClient.on("message", async (topic, message) => {
   if (topic === "library/usersVerification") { 
     const uuid = messageString;
     const isAuthorized = await verifyCard(uuid);
-    const responseTopic = `library/usersVerification/${uuid}`;
-    console.log("Topic actual: ", responseTopic);
-    mqttClient.publish(responseTopic, isAuthorized ? "authorized" : "unauthorized");
+    // const responseTopic = `library/usersVerification/${uuid}`;
+    // console.log("Topic actual: ", responseTopic);
+    // mqttClient.publish(responseTopic, isAuthorized ? "authorized" : "unauthorized");
 
-    console.log("Acabo de realizar un publish con el estado de si esta autorizado o no");
-    console.log("Estado Actual: ", isAuthorized);
+    // console.log("Acabo de realizar un publish con el estado de si esta autorizado o no");
+    console.log("Estas autorizado? : ", isAuthorized);
 
 
     // FIXME: Es probable que acá también se produzca un error. Debido a que siempre hace el publish en confirm verification
@@ -192,7 +192,7 @@ mqttClient.on("message", async (topic, message) => {
       confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`).catch(console.dir);
       console.log(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
     }
-    console.log("El isAuthorized dio true");
+    // console.log("El isAuthorized dio true");
   }
 
   if (topic.startsWith("library/bookRequests/")) {
@@ -201,6 +201,15 @@ mqttClient.on("message", async (topic, message) => {
     const responseTopic = `library/bookRequests/${bookId}`;
     mqttClient.publish(responseTopic, status ? "success" : "fail");
   }
+
+  if (topic.startsWith("library/usersVerification/")) {
+    const cardUUID = topic.split('/').pop();
+    const status = await requestBook(bookId);
+    const responseTopic = `library/bookRequests/${bookId}`;
+    mqttClient.publish(responseTopic, status ? "success" : "fail");
+  }
+
+
 });
 
 module.exports = {

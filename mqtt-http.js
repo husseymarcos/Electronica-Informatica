@@ -36,7 +36,7 @@ const pendingVerifications = new Map();
 const pendingRequests = new Map();
 
 // Suscribirse al tópico de respuesta cuando se conecta al servidor MQTT
-mqttClient.on('connect', () => {
+/*mqttClient.on('connect', () => {
   
   mqttClient.subscribe('library/usersVerification/#', (err) => {
     if (!err) {
@@ -53,7 +53,7 @@ mqttClient.on('connect', () => {
       console.error('Error al suscribirse al tópico:', err);
     }
   });
-});
+});*/
 
 
 // Ruta para obtener todos los libros
@@ -107,7 +107,7 @@ app.post('/api/rfid/verification', async (req, res) => {
     pendingVerifications.set(responseTopic, { resolve, reject });
   });
 
-  mqttClient.publish('library/usersVerification', uuid, (err) => {
+  mqttClient.publish('library/usersVerification', uuid, (err) => { // Es lo mismo que tener library/usersVerification acá publica el uuid.
     console.log("Estoy ejecutando la publicación en el topic library/usersVerification");
     if (err) {
       console.error("Error al publicar en MQTT:", err);
