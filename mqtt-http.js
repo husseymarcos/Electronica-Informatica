@@ -91,8 +91,9 @@ app.post('/api/books/publish', (req, res) => {
 
 });
 
+// Fijate de donde podría salir el uuid. 
 // Ruta para verificación del RFID
-app.get('/api/rfid/verification', async (req, res) => {
+app.get(`/api/rfid/verification?uuid=${uuid}`, async (req, res) => {
   console.log("llegué a hacer algo en /api/rfid/verification");
   const { uuid } = req.query;
   console.log("UUID: ", uuid);
