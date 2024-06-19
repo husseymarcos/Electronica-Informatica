@@ -39,7 +39,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 const char* ssid = "Telecentro-40fe";
 const char* password = "898PHFSD88L7";
 
-String lastUUID = ""; // Logica para evitar tener que manejar si agrego varias veces la tarjeta que no la agregue 30 veces en la db
+String lastUUID = ""; 
 
 
 
@@ -68,7 +68,7 @@ void setup() {
 
 
   MQTT_CLIENT.setClient(WIFI_CLIENT);
-  MQTT_CLIENT.setServer("54.87.96.253", 1883);  // public IP
+  MQTT_CLIENT.setServer("100.29.7.4", 1883);  // public IP
   
 }
 
