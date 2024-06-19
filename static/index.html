@@ -51,7 +51,7 @@
       console.log('Verificando tarjeta con UUID:', uuid);
 
       const response = await fetch('/api/rfid/verification', {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         },
