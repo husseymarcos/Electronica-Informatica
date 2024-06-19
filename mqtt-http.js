@@ -92,9 +92,9 @@ app.post('/api/books/publish', (req, res) => {
 });
 
 // Ruta para verificación del RFID
-app.post('/api/rfid/verification', async (req, res) => {
+app.get('/api/rfid/verification', async (req, res) => {
   console.log("llegué a hacer algo en /api/rfid/verification");
-  const { uuid } = req.body;
+  const { uuid } = req.query;
   const responseTopic = `library/usersVerification/${uuid}`;
   
 
