@@ -204,5 +204,7 @@ mqttClient.on("message", async (topic, message) => {
 });
 
 module.exports = {
-  addBookToDB
+  addBookToDB,
+  mqttClient,
+  mongoUri
 };

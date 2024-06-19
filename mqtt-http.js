@@ -8,12 +8,18 @@ const WebSocket = require('ws');
 const { MongoClient } = require('mongodb');
 const { addBookToDB } = require('./server');
 
+const {mongoUri} = require('./server');
+
+const {mqttClient} = require('./server');
+
 // Configuración de mongoDB
-var mongoUri = 'mongodb://' + config.mongodb.hostname + ':' + config.mongodb.port + '/' + config.mongodb.database;
+// var mongoUri = 'mongodb://' + config.mongodb.hostname + ':' + config.mongodb.port + '/' + config.mongodb.database;
 
 // Configuración de MQTT
-var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port; // Broker de MQTT
-const mqttClient = mqtt.connect(mqttUri);
+// var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port; // Broker de MQTT
+// const mqttClient = mqtt.connect(mqttUri);
+
+
 
 // Crear una aplicación Express
 const app = express();
