@@ -138,7 +138,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
 // Función de callback para manejar los mensajes MQTT - ConfirmVerification
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println("Callback ejecutado");
-
   Serial.println("Mensaje recibido [");
   Serial.print(topic);
   Serial.print("]: ");
