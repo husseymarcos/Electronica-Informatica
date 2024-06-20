@@ -137,7 +137,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 // Función de callback para manejar los mensajes MQTT - ConfirmVerification
 void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Callback ejecutado");
+  Serial.println("Callback ejecutado");
 
   Serial.println("Mensaje recibido [");
   Serial.print(topic);
@@ -160,14 +160,16 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if(String(topic) == "library/books"){
     const char* title = doc["title"];
     const char* author = doc["author"];
+    const char* genre = doc["genre"];
     int year = doc["year"];
 
-    // Genre falta
-
+  
     Serial.print("Title: ");
     Serial.println(title);
     Serial.print("Author: ");
     Serial.println(author);
+    Serial.print("Genre: ");
+    Serial.println(genre);
     Serial.print("Year: ");
     Serial.println(year);
 
@@ -185,9 +187,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println((char*) payload);
   }
 
-
-
-  
 }
 
 // Reconecta con MQTT broker
