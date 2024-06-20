@@ -95,7 +95,7 @@ app.post('/api/books/publish', (req, res) => {
 // Ruta para verificación del RFID
 app.get(`/api/rfid/verification?uuid=${uuid}`, async (req, res) => { // FIXME: Anda mal! :(. 
   // TODO: Que chequee en la base de datos. Manda al topic confirmVerification. Volver a realizar esta lógica. 
-  console.log("llegué a hacer algo en /api/rfid/verification");
+  console.log("Llegué a hacer algo en /api/rfid/verification");
   const { uuid } = req.query;
   console.log("UUID: ", uuid);
   const responseTopic = `library/usersVerification/${uuid}`;
