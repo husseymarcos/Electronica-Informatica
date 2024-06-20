@@ -27,7 +27,7 @@ const pendingVerifications = new Map();
 // Mapa para almacenar las promesas de solicitud de libros
 // const pendingRequests = new Map();
 
-/*mqttClient.on('connect', () => {
+mqttClient.on('connect', () => {
   mqttClient.subscribe('library/usersVerification/#', (err) =>{
     if(err){
       console.error("Error al suscribirse a los tópicos de verificación:", err);
@@ -35,7 +35,7 @@ const pendingVerifications = new Map();
       console.log("Suscrito a library/usersVerification/#");
     } 
   })
-});*/
+});
 
 
 // Ruta para obtener todos los libros
