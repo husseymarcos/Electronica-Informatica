@@ -57,9 +57,11 @@
         },
       });
 
+      console.log("Response: ", response);
+
       const result = await response.json();
 
-      console.log(result);
+      console.log("Result: ", result);
 
       if (result.status === 'success' && result.message === 'authorized') {
         window.location.href = '/home.html';

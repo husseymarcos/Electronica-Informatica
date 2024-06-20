@@ -66,10 +66,15 @@ app.post('/api/books/publish', (req, res) => {
 
 // Fijate de donde podría salir el uuid. 
 // Ruta para verificación del RFID
-app.get('/api/rfid/verification?uuid=${uuid}', async (req, res) => { // FIXME: Anda mal! :(. 
+app.get('/api/rfid/verification/:uuid', async (req, res) => { // FIXME: Anda mal! :(. 
   // TODO: Que chequee en la base de datos (debe chequear en usersVerification). Manda al topic confirmVerification. Volver a realizar esta lógica. 
   
-  const {uuid} = req.query
+  const uuid = req.params.uuid;
+
+  console.log("UUID: ", uuid);
+  console.log();
+  console.log(req.query);
+  console.log();
 
   const responseTopic = `library/usersVerification/${uuid}`; // TODO: Evaluá el sentido de responseTopic, se lo usa más abajo con tema de websocket, por eso consideré dejarlo acá.
   
