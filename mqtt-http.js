@@ -73,14 +73,16 @@ app.get('/api/rfid/verification', async (req, res) => { // FIXME: Anda mal! :(.
 
   console.log("UUID: ", uuid);
   console.log();
-  console.log(req.query);
-  console.log();
+  // console.log(req.query);
+  // console.log();
 
   const responseTopic = `library/usersVerification/${uuid}`; // TODO: Evaluá el sentido de responseTopic, se lo usa más abajo con tema de websocket, por eso consideré dejarlo acá.
   
   const verificationPromise = new Promise((resolve, reject) =>{
     pendingVerifications.set(responseTopic, {resolve, reject});
   })
+
+  console.log("Verification Promise: ", verificationPromise);
 
   try{ 
     const status = await verificationPromise;
