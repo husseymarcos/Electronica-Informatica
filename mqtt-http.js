@@ -68,9 +68,7 @@ app.post('/api/books/publish', (req, res) => {
 // Ruta para verificación del RFID
 app.post('/api/rfid/verification', async (req, res) => { // FIXME: Anda mal! :(. Fijate si falla ahora, de hacerlo con post.  
   // TODO: Que chequee en la base de datos (debe chequear en usersVerification). Manda al topic confirmVerification. Volver a realizar esta lógica. 
-  console.log(req.query);
-  console.log();
-  const uuid = req.query.uuid; // last chance --> req.body
+  const uuid = req.body; // last chance --> req.body
 
   console.log("UUID: ", uuid);
   console.log();
