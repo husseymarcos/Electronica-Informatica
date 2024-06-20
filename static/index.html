@@ -50,11 +50,12 @@
     async function verifyCard(uuid) {
       console.log('Verificando tarjeta con UUID:', uuid);
 
-      const response = await fetch(`/api/rfid/verification?uuid=${uuid}`, {
+      const response = await fetch('/api/rfid/verification', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         },
+        body: JSON.stringify({ uuid })
       });
 
       console.log("Response: ", response);
