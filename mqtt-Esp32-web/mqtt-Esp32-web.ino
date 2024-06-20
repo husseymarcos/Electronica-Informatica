@@ -36,8 +36,8 @@ PubSubClient MQTT_CLIENT;
 MFRC522 mfrc522(SS_PIN, RST_PIN); 
 
 // Nombre y contraseña de tu red WiFi.
-const char* ssid = "UA-Alumnos";
-const char* password = "41umn05WLC";
+const char* ssid = "Telecentro-40fe";
+const char* password = "898PHFSD88L7";
 
 String lastUUID = ""; 
 
@@ -139,7 +139,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Callback ejecutado");
 
-  Serial.print("Mensaje recibido [");
+  Serial.println("Mensaje recibido [");
   Serial.print(topic);
   Serial.print("]: ");
   char msg[length + 1];
@@ -195,7 +195,7 @@ void reconnect() {
   // MQTT_CLIENT.setServer("192.168.1.206", 1883); // si uso un servidor local <ver IP correcta>
 
   MQTT_CLIENT.setClient(WIFI_CLIENT);
-  MQTT_CLIENT.setServer("54.80.59.88", 1883);  // public IP
+  MQTT_CLIENT.setServer("34.207.223.222", 1883);  // public IP
   
   // Intentando conectar con el broker.
   while (!MQTT_CLIENT.connected()) {
