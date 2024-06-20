@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mqtt = require("mqtt");
 const path = require('path');
 const config = require('./config');
 const { verifyCard } = require('./server'); // Importar la función verifyCard
@@ -11,13 +10,6 @@ const { addBookToDB } = require('./server');
 const {mongoUri} = require('./server');
 
 const {mqttClient} = require('./server');
-
-// Configuración de mongoDB
-// var mongoUri = 'mongodb://' + config.mongodb.hostname + ':' + config.mongodb.port + '/' + config.mongodb.database;
-
-// Configuración de MQTT
-// var mqttUri  = 'mqtt://' + config.mqtt.hostname + ':' + config.mqtt.port; // Broker de MQTT
-// const mqttClient = mqtt.connect(mqttUri);
 
 
 
@@ -33,27 +25,8 @@ const wss = new WebSocket.Server({ noServer: true });
 const pendingVerifications = new Map();
 
 // Mapa para almacenar las promesas de solicitud de libros
-const pendingRequests = new Map();
+// const pendingRequests = new Map();
 
-// Suscribirse al tópico de respuesta cuando se conecta al servidor MQTT
-/*mqttClient.on('connect', () => {
-  
-  mqttClient.subscribe('library/usersVerification/#', (err) => {
-    if (!err) {
-      console.log('Suscrito a library/usersVerification/#');
-    } else {
-      console.error('Error al suscribirse al tópico:', err);
-    }
-  });
-
-  mqttClient.subscribe('library/bookRequests/#', (err) => {
-    if (!err) {
-      console.log('Suscrito a library/bookRequests/#');
-    } else {
-      console.error('Error al suscribirse al tópico:', err);
-    }
-  });
-});*/
 
 
 // Ruta para obtener todos los libros
@@ -94,46 +67,24 @@ app.post('/api/books/publish', (req, res) => {
 // Fijate de donde podría salir el uuid. 
 // Ruta para verificación del RFID
 app.get(`/api/rfid/verification?uuid=${uuid}`, async (req, res) => { // FIXME: Anda mal! :(. 
-  // TODO: Que chequee en la base de datos. Manda al topic confirmVerification. Volver a realizar esta lógica. 
-  console.log("Llegué a hacer algo en /api/rfid/verification");
-  const { uuid } = req.query;
-  console.log("UUID: ", uuid);
-  const responseTopic = `library/usersVerification/${uuid}`;
+  // TODO: Que chequee en la base de datos (debe chequear en usersVerification). Manda al topic confirmVerification. Volver a realizar esta lógica. 
   
+  const responseTopic = `library/usersVerification/${uuid}`; // TODO: Evaluá el sentido de responseTopic, se lo usa más abajo con tema de websocket, por eso consideré dejarlo acá.
   
-  // Verificar si ya hay una promesa pendiente para esta UUID
-  if (pendingVerifications.has(responseTopic)) {
-    return res.status(429).send("Verification already in progress.");
-  }
+  const verificationPromise = new Promise((resolve, reject) =>{
+    pendingVerifications.set(responseTopic, {resolve, reject});
+  })
 
-  const verificationPromise = new Promise((resolve, reject) => {
-    pendingVerifications.set(responseTopic, { resolve, reject });
-  });
-
-  mqttClient.publish('library/usersVerification', uuid, (err) => { // Es lo mismo que tener library/usersVerification acá publica el uuid.
-    console.log("Estoy ejecutando la publicación en el topic library/usersVerification");
-    if (err) {
-      console.error("Error al publicar en MQTT:", err);
-      res.status(500).send("Error al verificar la tarjeta.");
-      pendingVerifications.delete(responseTopic);
-    }
-  });
-
-
-  try {
+  try{ 
     const status = await verificationPromise;
-    if (status === 'authorized') {
-      // Send response indicating success
-      res.json({ status: 'success', message: 'authorized' });
-      console.log("publique la res");
-      // Publicar en el topic de confirmación - Comunicación con ESP32 
+
+    if(verifyCard(uuid) && status === 'authorized'){ // verifyCard, es el que chequea en usersVerification.
+      res.json({status: 'success', message: 'authorized'});
       mqttClient.publish('library/confirmVerification', `Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
-      // si te lo llega a agregar 2 veces, fijate de manejarlo con el topic 
- 
     } else {
-      res.status(403).json({ status: 'error', message: 'unauthorized' });
+      res.status(403).json({status: 'error', message: 'unathorized'});
     }
-  } catch (error) {
+  } catch (error){
     res.status(500).send("Error al verificar la tarjeta.");
   } finally {
     pendingVerifications.delete(responseTopic);
@@ -146,7 +97,7 @@ app.get(`/api/rfid/verification?uuid=${uuid}`, async (req, res) => { // FIXME: A
 
 // Ruta para SOLICITUD de LIBROS
 
-app.post('/api/books/request/:id', async (req, res) => {
+/*app.post('/api/books/request/:id', async (req, res) => {
   const bookId = req.params.id;
   const responseTopic = `library/bookRequests/${bookId}`;
 
@@ -179,7 +130,7 @@ app.post('/api/books/request/:id', async (req, res) => {
   } finally {
     pendingRequests.delete(responseTopic);
   }
-});
+});*/
 
 
 

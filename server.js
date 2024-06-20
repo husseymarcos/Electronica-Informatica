@@ -58,20 +58,20 @@ async function addUserCardToDB(uuid) {
   }
 }
 
-async function verifyCard(uuid) {
+async function verifyCard(uuid) { // Interactuan las colecciones de registerUsers y usersVerification
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
     const database = client.db(config.mongodb.database);
-    const registeredCollection = database.collection(config.mongodb.usersRegisterCollection);
+    const registeredCollection = database.collection(config.mongodb.usersRegisterCollection); // registerUsers
     const card = await registeredCollection.findOne({ uuid: uuid });
-    const verificationCollection = database.collection(config.mongodb.usersCollection);
+    const verificationCollection = database.collection(config.mongodb.usersCollection); // usersVerification
 
     if(!card){
       const existingVerification = await verificationCollection.findOne({ uuid: uuid });
 
       if (!existingVerification) { // Si no existe lo agrega
-        await verificationCollection.insertOne({ uuid: uuid });
+        await verificationCollection.insertOne({ uuid: uuid }); // Acá le agrego datos a usersVerification
         return true;
       }
     } else{
@@ -86,7 +86,7 @@ async function verifyCard(uuid) {
   }
 }
 
-async function requestBook(bookId) {
+async function requestBook(bookId) { // TODO: Ver esto
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
@@ -117,7 +117,7 @@ async function requestBook(bookId) {
 }
 
 
-// FIXME: ConfirmVerification provoca un loop impresionante. Hay que corregir eso
+
 async function confirmVerification(successMsg) {
   const client = new MongoClient(mongoUri);
   try {
@@ -128,7 +128,6 @@ async function confirmVerification(successMsg) {
 
     if(!existingConfirmVerification){ // Si no encuentra ese mensaje en la collection, lo agrega
       await collection.insertOne({ success: successMsg });
-      // mqttClient.publish('library/confirmVerification', successMsg); // FIXME: Esto estará bien acá? No entiendo :/
     } else{ // si el mensaje ya existe, informa que la verificación ya fue hecha. No inserta más nada.
       console.log("Se ha confirmado tu verificación, bienvenido!");
     }    
@@ -177,43 +176,26 @@ mqttClient.on("message", async (topic, message) => {
   if (topic === "library/usersVerification") { 
     const uuid = messageString;
     const isAuthorized = await verifyCard(uuid);
-    // const responseTopic = `library/usersVerification/${uuid}`;
-    // console.log("Topic actual: ", responseTopic);
-    // mqttClient.publish(responseTopic, isAuthorized ? "authorized" : "unauthorized");
-
-    // console.log("Acabo de realizar un publish con el estado de si esta autorizado o no");
     console.log("Estas autorizado? : ", isAuthorized);
 
-
-    // FIXME: Es probable que acá también se produzca un error. Debido a que siempre hace el publish en confirm verification
-    // Quizá una forma viable de poder evitar eso, es usar true y false, si es true lo hace como si fuera la primera vez, y sino ya está no hace nada.
-    // TODO: Ver que carajo hace si ya está previamente autorizado.
     if (isAuthorized) {
       confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`).catch(console.dir);
       console.log(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
     }
-    // console.log("El isAuthorized dio true");
   }
 
-  if (topic.startsWith("library/bookRequests/")) {
+  if (topic.startsWith("library/bookRequests/")) { // TODO: Ver esto
     const bookId = topic.split('/').pop();
     const status = await requestBook(bookId);
     const responseTopic = `library/bookRequests/${bookId}`;
     mqttClient.publish(responseTopic, status ? "success" : "fail");
   }
 
-  if (topic.startsWith("library/usersVerification/")) {
-    const cardUUID = topic.split('/').pop();
-    const status = await requestBook(bookId);
-    const responseTopic = `library/bookRequests/${bookId}`;
-    mqttClient.publish(responseTopic, status ? "success" : "fail");
-  }
-
-
 });
 
 module.exports = {
   addBookToDB,
   mqttClient,
-  mongoUri
+  mongoUri,
+  verifyCard
 };
