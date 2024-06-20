@@ -27,6 +27,15 @@ const pendingVerifications = new Map();
 // Mapa para almacenar las promesas de solicitud de libros
 // const pendingRequests = new Map();
 
+/*mqttClient.on('connect', () => {
+  mqttClient.subscribe('library/usersVerification/#', (err) =>{
+    if(err){
+      console.error("Error al suscribirse a los tópicos de verificación:", err);
+    } else {
+      console.log("Suscrito a library/usersVerification/#");
+    } 
+  })
+});*/
 
 
 // Ruta para obtener todos los libros
@@ -68,7 +77,7 @@ app.post('/api/books/publish', (req, res) => {
 // Ruta para verificación del RFID
 app.post('/api/rfid/verification', async (req, res) => { // FIXME: Anda mal! :(. Fijate si falla ahora, de hacerlo con post.  
   // TODO: Que chequee en la base de datos (debe chequear en usersVerification). Manda al topic confirmVerification. Volver a realizar esta lógica. 
-  const uuid = req.body; // last chance --> req.body
+  const uuid = req.body.uuid; // last chance --> req.body
 
   console.log("UUID: ", uuid);
   console.log();
