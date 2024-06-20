@@ -25,18 +25,14 @@
 
     ws.onmessage = (event) => {
       console.log('Mensaje recibido del servidor WebSocket:', event.data);
-      const data = JSON.parse(event.data);
-
-      console.log(data);
-      const uuid = data.message;
-      console.log("UUID: ", uuid);
-      verifyCard(uuid);
-
-      /*if (data.topic.startsWith('library/usersVerification/')) {
-        // Extract UUID from the topic
-        const uuid = data.topic.split('/').pop();
+      try {
+        const data = JSON.parse(event.data);
+        const uuid = data.message;
+        console.log("UUID: ", uuid);
         verifyCard(uuid);
-      }*/
+      } catch (e) {
+        console.error('Error al procesar el mensaje recibido:', e);
+      }
     };
 
     ws.onclose = () => {
@@ -50,24 +46,27 @@
     async function verifyCard(uuid) {
       console.log('Verificando tarjeta con UUID:', uuid);
 
-      const response = await fetch('/api/rfid/verification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ uuid })
-    });
+      try {
+        const response = await fetch('/api/rfid/verification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ uuid })
+        });
 
-      console.log("Response: ", response);
+        const result = await response.json();
 
-      const result = await response.json();
+        console.log("Result: ", result);
 
-      console.log("Result: ", result);
-
-      if (result.status === 'success' && result.message === 'authorized') {
-        window.location.href = '/home.html';
-      } else {
-        alert('Error: ' + result.message);
+        if (result.status === 'success' && result.message === 'authorized') {
+          window.location.href = '/home.html';
+        } else {
+          alert('Error: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error durante la verificación de la tarjeta:', error);
+        alert('Error durante la verificación de la tarjeta.');
       }
     }
   </script>
