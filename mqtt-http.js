@@ -66,10 +66,10 @@ app.post('/api/books/publish', (req, res) => {
 
 // Fijate de donde podría salir el uuid. 
 // Ruta para verificación del RFID
-app.get('/api/rfid/verification', async (req, res) => { // FIXME: Anda mal! :(. 
+app.get('/api/rfid/verification/:uuid?', async (req, res) => { // FIXME: Anda mal! :(. 
   // TODO: Que chequee en la base de datos (debe chequear en usersVerification). Manda al topic confirmVerification. Volver a realizar esta lógica. 
   
-  const uuid = req.query.uuid; // cambio de req.params.uuid a req.query.uuid
+  const uuid = req.params.uuid; // cambio de req.params.uuid a req.query.uuid
 
   console.log("UUID: ", uuid);
   console.log();
@@ -80,7 +80,7 @@ app.get('/api/rfid/verification', async (req, res) => { // FIXME: Anda mal! :(.
   const responseTopic = `library/usersVerification/${uuid}`; // TODO: Evaluá el sentido de responseTopic, se lo usa más abajo con tema de websocket, por eso consideré dejarlo acá.
   
   mqttClient.publish(responseTopic, isAuthorized ? "authorized": "unathorized");
-  
+
   const verificationPromise = new Promise((resolve, reject) =>{
     pendingVerifications.set(responseTopic, {resolve, reject});
   })
@@ -91,6 +91,8 @@ app.get('/api/rfid/verification', async (req, res) => { // FIXME: Anda mal! :(.
 
   try{ 
     const status = await verificationPromise;
+
+    console.log("Status: ", status);
 
     if(status === 'authorized'){ // verifyCard, es el que chequea en usersVerification.
       res.json({status: 'success', message: 'authorized'});
