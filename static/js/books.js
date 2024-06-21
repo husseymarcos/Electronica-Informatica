@@ -46,11 +46,14 @@ function fetchAllBooks() {
 Es probable que tenga que armarse similar a la parte de rfid/verification. 
 */ 
 function requestBook(bookId) {
-    fetch(`/api/books/request/${bookId}`, {
+    console.log("Id del libro solicitado: ", bookId);
+    
+    fetch('/api/books/request', { // Antes era así --> `/api/books/request/${bookId}`
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
-        }
+        }, 
+        body: JSON.stringify({ id: bookId })
     })
     .then(response => {
         if (!response.ok) {

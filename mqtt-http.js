@@ -5,7 +5,10 @@ const config = require('./config');
 const { verifyCard } = require('./server'); // Importar la función verifyCard
 const WebSocket = require('ws');
 const { MongoClient } = require('mongodb');
+
 const { addBookToDB } = require('./server');
+
+const { requestBook } = require('./server');
 
 const {mongoUri} = require('./server');
 
@@ -35,6 +38,15 @@ mqttClient.on('connect', () => { // Si aca jode agregando 40 datos, es que el pr
       console.log("Suscrito a library/usersVerification/#");
     } 
   })
+
+  mqttClient.subscribe('library/bookRequests/#', (err) => {
+    if(err){
+      console.error("Error al suscribirse a los tópicos de solicitud de libros:", err);
+    } else {
+      console.log("Suscrito a library/bookRequests/#");
+    }
+  })
+
 });
 
 
@@ -125,10 +137,8 @@ app.post('/api/rfid/verification', async (req, res) => {
 
 
 */ 
-app.post('/api/books/request/:id', async (req, res) => { // TODO: 
-
-
-  const bookId = req.params.id;
+app.post('/api/books/request', async (req, res) => { // TODO: 
+  const bookId = req.body.id; // req.body.id; // En lugar de req.params.id
   console.log(bookId);
 
   const responseTopic = `library/bookRequests/${bookId}`;
@@ -141,21 +151,25 @@ app.post('/api/books/request/:id', async (req, res) => { // TODO:
     pendingRequests.set(responseTopic, { resolve, reject });
   });
 
-  mqttClient.publish('library/bookRequests', bookId, (err) => {
+  const status = await requestBook(bookId);
+
+  mqttClient.publish(responseTopic, status ? "libro disponible" : "libro no disponible");
+
+  /*mqttClient.publish('library/bookRequests', bookId, (err) => {
     console.log("Estoy ejecutando la publicación en el topic library/bookRequests");
     if (err) {
       console.error("Error al publicar en MQTT:", err);
       res.status(500).send("Error al solicitar el libro.");
       pendingRequests.delete(responseTopic);
     }
-  });
+  });*/
 
   try {
     const status = await requestPromise;
-    if (status === 'available') {
-      res.json({ status: 'success', message: 'Libro disponible' });
+    if (status === 'libro disponible') {
+      res.json({ status: 'success', message: 'libro disponible' });
     } else {
-      res.status(403).json({ status: 'error', message: 'Libro no disponible' });
+      res.status(403).json({ status: 'error', message: 'libro no disponible' });
     }
   } catch (error) {
     res.status(500).send("Error al solicitar el libro.");
@@ -168,26 +182,45 @@ app.post('/api/books/request/:id', async (req, res) => { // TODO:
 
 
 
-
 // Manejar los mensajes recibidos en los tópicos de respuesta - Verificación de RFID
 mqttClient.on('message', (topic, message) => {
-  console.log(`Mensaje recibido en el tópico ${topic}: ${message}`);
-  if (pendingVerifications.has(topic)) {
-    const { resolve } = pendingVerifications.get(topic);
-    resolve(message.toString());
-    pendingVerifications.delete(topic);
-    console.log(`Promesa resuelta para el tópico ${topic}`);
-  } else {
-    console.log(`No hay promesas pendientes para el tópico ${topic}`);
+  if(topic === 'library/usersVerification/#' ){
+    console.log(`Mensaje recibido en el tópico ${topic}: ${message}`);
+    if (pendingVerifications.has(topic)) {
+      const { resolve } = pendingVerifications.get(topic);
+      resolve(message.toString());
+      pendingVerifications.delete(topic);
+      console.log(`Promesa resuelta para el tópico ${topic}`);
+    } else {
+      console.log(`No hay promesas pendientes para el tópico ${topic}`);
+    }
   }
 
-  // Enviar el mensaje recibido a todos los clientes WebSocket
+
+    // Enviar el mensaje recibido a todos los clientes WebSocket
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify({ topic, message: message.toString() }));
     }
   });
+
+
+  // Manejar los mensajes recibidos en los tópicos de respuesta - Solicitud de libros
+  // TODO: Evaluar si esto tiene sentido
+
+  if(topic === 'library/bookRequests/#' ){
+  if (pendingRequests.has(topic)) {
+      const { resolve } = pendingRequests.get(topic);
+      resolve(message.toString());
+      pendingRequests.delete(topic);
+      console.log(`Promesa resuelta para el tópico ${topic}`);
+    } else {
+      console.log(`No hay promesas pendientes para el tópico ${topic}`);
+    }
+  }
 });
+
+
 
 // Manejar las conexiones WebSocket
 wss.on('connection', ws => {

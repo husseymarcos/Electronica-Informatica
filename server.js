@@ -126,7 +126,7 @@ async function requestBook(bookId) { // TODO: Ver esto
     await client.connect();
     const database = client.db(config.mongodb.database);
     const bookCollection = database.collection(config.mongodb.bookCollection);
-    const book = await bookCollection.findOne({ _id: bookId });
+    const book = await bookCollection.findOne({ _id: bookId }); // Chequea que el libro esté.
 
     if (book) {
       const requestCollection = database.collection(config.mongodb.bookRequestCollection); // TODO: Es necesario tener esta collection?
@@ -138,10 +138,14 @@ async function requestBook(bookId) { // TODO: Ver esto
         await requestCollection.insertOne({ _id: bookId });
         await myBooksCollection.insertOne({ _id: bookId });
         return true;
+      } else {
+        console.log(`El libro con id ${bookId} ya fue solicitado previamente.`);
+        return false; // Ya estaba solicitado previamente.
       }
-      return false; // Ya estaba solicitado previamente.
+    } else{
+      console.log(`El libro con id ${bookId} no se encontró.`);
+      return false; // El libro no se encontró.
     }
-    return false; // El libro no se encontró.
   } catch (error) {
     console.error("Error requesting book:", error);
     return 'error';
@@ -149,6 +153,9 @@ async function requestBook(bookId) { // TODO: Ver esto
     await client.close();
   }
 }
+
+
+
 
 
 async function confirmVerification(successMsg) {
@@ -223,9 +230,14 @@ mqttClient.on("message", async (topic, message) => {
 
   if (topic.startsWith("library/bookRequests/")) { // TODO: Ver esto
     const bookId = topic.split('/').pop();
+    console.log(bookId);
     const status = await requestBook(bookId);
-    const responseTopic = `library/bookRequests/${bookId}`;
-    mqttClient.publish(responseTopic, status ? "success" : "fail");
+    console.log("Status: ", status);
+    if(status){
+      const bookCollection = database.collection(config.mongodb.bookCollection);
+      const book = await bookCollection.findOne({ _id: bookId }); // Chequea que el libro esté.
+      console.log(`Libro: ${book.title} solicitado exitosamente. `);
+    }
   }
 
 });
@@ -234,5 +246,6 @@ module.exports = {
   addBookToDB,
   mqttClient,
   mongoUri,
-  verifyCard
+  verifyCard,
+  requestBook
 };
