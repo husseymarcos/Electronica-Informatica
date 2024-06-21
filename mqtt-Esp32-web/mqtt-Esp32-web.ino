@@ -36,7 +36,7 @@ PubSubClient MQTT_CLIENT;
 MFRC522 mfrc522(SS_PIN, RST_PIN); 
 
 // Nombre y contraseña de tu red WiFi.
-const char* ssid = "Fibertel Wifi682 2.4Ghz";
+const char* ssid = "Fibertel WiFi682 2.4Ghz";
 const char* password = "01421499959";
 
 String lastUUID = ""; 
