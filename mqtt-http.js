@@ -187,7 +187,3 @@ server.on('upgrade', (request, socket, head) => {
 });
 
 
-
-module.exports = {
-  pendingRequests
-};
