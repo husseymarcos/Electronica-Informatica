@@ -58,7 +58,36 @@ app.get('/api/books', async (req, res) => {
   }
 });
 
+// TODO: Hacer algo similar para obtener todos los libros, pero asociado a cada tarjeta!
+// TODO: Hacer la lógica para devolver los libros ASOCIADOS A CADA TARJETA. Es decir, los libros que solicito cada usuario.
 
+/*Posible forma de implementarlo:
+Es posible informar en la database de myBooks, el id del usuario que solicitó. Y comparar mediante eso, es decir:
+
+Tener un parámetro denominado uuid, donde si es determinado uuid, devuelva determinados libros y lo mismo con el otro uuid.
+
+TODO: Ver como podría implementarse. Notemos que no sé cada uuid, de cada tarjeta, debería hacerse de forma "automática".
+*/ 
+
+// TODO: Ver acá donde entra la lógica para implementar el returnBook, implementado en server.js
+
+app.get('/api/mybooks', async (req, res) => {
+  const client = new MongoClient(mongoUri);
+
+  try {
+    await client.connect();
+    const database = client.db(config.mongodb.database);
+    const myBooksCollection = database.collection(config.mongodb.myBooksCollection);
+    const books = await myBooksCollection.find({}).toArray(); // TODO: Lo malo acá, es que va a devolver los libros que fueron solicitados por todos los usuarios. 
+
+    res.json(books);
+  } catch (error) {
+    console.error('Error al obtener la lista de libros:', error);
+    res.status(500).send('Error al obtener la lista de libros.');
+  } finally {
+    await client.close();
+  }
+});
 
 // Ruta para agregar un libro
 app.post('/api/books/publish', (req, res) => {
@@ -134,7 +163,7 @@ app.post('/api/books/request', async (req, res) => { // TODO:
     res.status(500).send("Error al solicitar el libro.");
   });
 
-  const responseTopic = `library/bookRequests/${bookId}`;
+  const responseTopic = `library/bookRequests/${bookId}`; // Aca realizo un publish a library/books/#
 
   mqttClient.publish(responseTopic, bookId);
 });
