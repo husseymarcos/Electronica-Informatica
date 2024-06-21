@@ -129,6 +129,13 @@ async function requestBook(bookId) { // TODO: Ver esto
     const bookCollection = database.collection(config.mongodb.bookCollection);
     const book = await bookCollection.findOne({ _id: bookId }); // Chequea que el libro esté.
 
+    if(book.content._id === bookId){
+      console.log("El book.content._id es el siguiente: ", book.content._id);
+      console.log("El bookId es el siguiente: ", bookId);
+    } else{
+      console.log("Posible problema de casteo del dato");
+    }
+
     if (book) {
       const requestCollection = database.collection(config.mongodb.bookRequestCollection); // TODO: Es necesario tener esta collection?
       const myBooksCollection = database.collection(config.mongodb.myBooksCollection);
@@ -237,7 +244,7 @@ mqttClient.on("message", async (topic, message) => {
     if(status){ // Esto lo hago para poder acceder el título del libro e informar de forma más detallada. El chequeo se hace previamente en requestBook.
       const bookCollection = database.collection(config.mongodb.bookCollection);
       const book = await bookCollection.findOne({ _id: bookId }); // Chequea que el libro esté.
-      console.log(`Libro: ${book.title} solicitado exitosamente. `);
+      console.log(`Libro: ${book.content.title} solicitado exitosamente. `);
     }
   }
 });
