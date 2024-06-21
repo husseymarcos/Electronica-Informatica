@@ -1,5 +1,5 @@
 // Importar las dependencias necesarias
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const mqtt = require("mqtt");
 const config = require('./config');
 
@@ -127,24 +127,18 @@ async function requestBook(bookId) { // TODO: Ver esto
     await client.connect();
     const database = client.db(config.mongodb.database);
     const bookCollection = database.collection(config.mongodb.bookCollection);
-    const book = await bookCollection.findOne({ _id: bookId }); // Chequea que el libro esté.
-
-    if(book.content._id === bookId){
-      console.log("El book.content._id es el siguiente: ", book.content._id);
-      console.log("El bookId es el siguiente: ", bookId);
-    } else{
-      console.log("Posible problema de casteo del dato");
-    }
+    const objectId = new ObjectId(bookId); // conversión de bookId a ObjectId para evitar problemas de casteo
+    const book = await bookCollection.findOne({ _id: objectId }); // Chequea que el libro esté.
 
     if (book) {
       const requestCollection = database.collection(config.mongodb.bookRequestCollection); // TODO: Es necesario tener esta collection?
       const myBooksCollection = database.collection(config.mongodb.myBooksCollection);
 
-      const existingRequest = await requestCollection.findOne({ _id: bookId });
+      const existingRequest = await requestCollection.findOne({ _id: objectId });
 
       if (!existingRequest) {
-        await requestCollection.insertOne({ _id: bookId });
-        await myBooksCollection.insertOne({ _id: bookId });
+        await requestCollection.insertOne({ _id: objectId });
+        await myBooksCollection.insertOne({ _id: objectId });
         return true;
       } else {
         console.log(`El libro con id ${bookId} ya fue solicitado previamente.`);
@@ -243,7 +237,8 @@ mqttClient.on("message", async (topic, message) => {
     console.log("Status: ", status);
     if(status){ // Esto lo hago para poder acceder el título del libro e informar de forma más detallada. El chequeo se hace previamente en requestBook.
       const bookCollection = database.collection(config.mongodb.bookCollection);
-      const book = await bookCollection.findOne({ _id: bookId }); // Chequea que el libro esté.
+      const objectId = new ObjectId(bookId);
+      const book = await bookCollection.findOne({ _id: objectId }); // Chequea que el libro esté.
       console.log(`Libro: ${book.content.title} solicitado exitosamente. `);
     }
   }
