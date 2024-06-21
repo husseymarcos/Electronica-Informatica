@@ -143,7 +143,6 @@ app.post('/api/books/request', async (req, res) => { // TODO:
 
 // Manejar los mensajes recibidos en los tópicos de respuesta - Verificación de RFID
 mqttClient.on('message', (topic, message) => {
-  if(topic === 'library/usersVerification/#' ){
     console.log(`Mensaje recibido en el tópico ${topic}: ${message}`);
     if (pendingVerifications.has(topic)) {
       const { resolve } = pendingVerifications.get(topic);
@@ -153,8 +152,6 @@ mqttClient.on('message', (topic, message) => {
     } else {
       console.log(`No hay promesas pendientes para el tópico ${topic}`);
     }
-  }
-
 
     // Enviar el mensaje recibido a todos los clientes WebSocket
   wss.clients.forEach(client => {
