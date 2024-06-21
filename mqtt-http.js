@@ -93,7 +93,7 @@ app.post('/api/rfid/verification', async (req, res) => {
   })
 
 
-  mqttClient.publish(responseTopic, isAuthorized ? "authorized": "unathorized");
+  // mqttClient.publish(responseTopic, isAuthorized ? "authorized": "unathorized");
   
   try{ 
     const status = await verificationPromise;
