@@ -86,6 +86,40 @@ async function verifyCard(uuid) { // Interactuan las colecciones de registerUser
   }
 }
 
+
+/* TODO: Cosas a evaluar
+
+- Lo que debería evaluarse, es si hay alguna forma de ver si está o no el libro que solicitas.
+
+Es posible pensarlo, utilizando la collection de books, que contiene todos los libros que se fueron utilizando.
+
+- Si el libro está, se debería agregar a la collection de myBooks, que es la que contiene los libros que tiene el usuario.
+
+Bien, pensemos así la solicitud entonces:
+
+1. Se recibe el mensaje con el id del libro.
+2. Se busca el libro en la collection de books.
+3. Si el libro está, se agrega a la collection de myBooks.
+4. Se agrega a la collection de bookRequests.
+5. Se responde al cliente con un mensaje de éxito o fracaso.
+6. Se envía un mensaje al cliente con el resultado de la solicitud. 
+7. Informar por el SerialMonitor de Arduino 2 cosas:
+  - Por un lado el libro que solicitó.
+  - Por otro lado, si la solicitud fue o no un éxito.
+
+Entonces tenemos dos cuestiones:
+- Por el lado de la página web, se avisa al usuario que lo usa: "Libro solicitado correctamente"
+- Por el lado de Serial Monitor, debería informarse, "El libro solicitado fue: 'nombre del libro' y la solicitud fue un éxito o fracaso"
+
+De esa forma interactuamos tanto con la página web, como con el proyecto físico. 
+
+Casos de solicitud del mismo libro:
+1. Se chequea en bookRequests. Si el libro está ahí quiere decir que no puede volver a ser solicitado.
+2. Se le informa al usuario que "Libro no disponible"
+3. Se le informa al SerialMonitor que "El libro solicitado fue: 'nombre del libro' y la solicitud fue un fracaso"
+
+*/ 
+
 async function requestBook(bookId) { // TODO: Ver esto
   const client = new MongoClient(mongoUri);
   try {
@@ -95,7 +129,7 @@ async function requestBook(bookId) { // TODO: Ver esto
     const book = await bookCollection.findOne({ _id: bookId });
 
     if (book) {
-      const requestCollection = database.collection(config.mongodb.bookRequestCollection);
+      const requestCollection = database.collection(config.mongodb.bookRequestCollection); // TODO: Es necesario tener esta collection?
       const myBooksCollection = database.collection(config.mongodb.myBooksCollection);
 
       const existingRequest = await requestCollection.findOne({ _id: bookId });
@@ -117,7 +151,6 @@ async function requestBook(bookId) { // TODO: Ver esto
 }
 
 
-
 async function confirmVerification(successMsg) {
   const client = new MongoClient(mongoUri);
   try {
@@ -137,6 +170,10 @@ async function confirmVerification(successMsg) {
     await client.close();
   }
 }
+
+
+// ------
+
 
 mqttClient.on("connect", () => {
   const topics = [

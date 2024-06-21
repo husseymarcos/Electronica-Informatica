@@ -36,6 +36,15 @@ function fetchAllBooks() {
 
 
 // Function to request a book
+
+/*Posibles cambios que hay que realizar acá:
+
+- Endpoint: /api/books/request
+
+- Y abajo de headers --> body: JSON.stringify({ id })
+
+Es probable que tenga que armarse similar a la parte de rfid/verification. 
+*/ 
 function requestBook(bookId) {
     fetch(`/api/books/request/${bookId}`, {
         method: 'POST',

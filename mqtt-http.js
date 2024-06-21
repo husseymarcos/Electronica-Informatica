@@ -25,7 +25,7 @@ const wss = new WebSocket.Server({ noServer: true });
 const pendingVerifications = new Map();
 
 // Mapa para almacenar las promesas de solicitud de libros
-// const pendingRequests = new Map();
+const pendingRequests = new Map();
 
 mqttClient.on('connect', () => { // Si aca jode agregando 40 datos, es que el problema está acá debe estar definido en server.js
   mqttClient.subscribe('library/usersVerification/#', (err) =>{
@@ -116,8 +116,21 @@ app.post('/api/rfid/verification', async (req, res) => {
 
 // Ruta para SOLICITUD de LIBROS
 
-/*app.post('/api/books/request/:id', async (req, res) => {
+/*Posibles cambios que tenga que hacer:
+
+- Endpoint: /api/books/request
+
+- bookId = req.body.id; // En lugar de req.params.id
+
+
+
+*/ 
+app.post('/api/books/request/:id', async (req, res) => { // TODO: 
+
+
   const bookId = req.params.id;
+  console.log(bookId);
+
   const responseTopic = `library/bookRequests/${bookId}`;
 
   if (pendingRequests.has(responseTopic)) {
@@ -149,7 +162,10 @@ app.post('/api/rfid/verification', async (req, res) => {
   } finally {
     pendingRequests.delete(responseTopic);
   }
-});*/
+});
+
+
+
 
 
 
