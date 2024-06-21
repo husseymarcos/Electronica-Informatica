@@ -139,6 +139,7 @@ async function requestBook(bookId) { // TODO: Ver esto
       if (!existingRequest) {
         await requestCollection.insertOne({ _id: objectId });
         await myBooksCollection.insertOne({ _id: objectId });
+        console.log(`Libro: ${book.content.title} solicitado exitosamente. `);
         return true;
       } else {
         console.log(`El libro con id ${bookId} ya fue solicitado previamente.`);
@@ -235,12 +236,6 @@ mqttClient.on("message", async (topic, message) => {
     console.log(bookId);
     const status = await requestBook(bookId);
     console.log("Status: ", status);
-    if(status){ // Esto lo hago para poder acceder el título del libro e informar de forma más detallada. El chequeo se hace previamente en requestBook.
-      const bookCollection = database.collection(config.mongodb.bookCollection);
-      const objectId = new ObjectId(bookId);
-      const book = await bookCollection.findOne({ _id: objectId }); // Chequea que el libro esté.
-      console.log(`Libro: ${book.content.title} solicitado exitosamente. `);
-    }
   }
 });
 
