@@ -244,7 +244,6 @@ mqttClient.on("message", async (topic, message) => {
 
     // Logica que está hecha en mqtt-http.js lo traemos acá porque está declarado por este lado. 
     // Manejar los mensajes recibidos en los tópicos de respuesta - Solicitud de libro
-    console.log(`Mensaje recibido en el tópico ${topic}: ${message}`);
     if (pendingRequests.has(topic)) {
       const { resolve } = pendingRequests.get(topic);
       resolve(message.toString());

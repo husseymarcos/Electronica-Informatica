@@ -30,7 +30,7 @@ const pendingVerifications = new Map();
 // Mapa para almacenar las promesas de solicitud de libros
 const pendingRequests = new Map();
 
-mqttClient.on('connect', () => { // Si aca jode agregando 40 datos, es que el problema está acá debe estar definido en server.js
+mqttClient.on('connect', () => { // Conexión a MQTT
   mqttClient.subscribe('library/usersVerification/#', (err) =>{
     if(err){
       console.error("Error al suscribirse a los tópicos de verificación:", err);
