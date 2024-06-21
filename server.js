@@ -121,6 +121,11 @@ Casos de solicitud del mismo libro:
 
 */ 
 
+/*TODO:
+
+Fijate que no te duplique las cosas tanto por node server.js, como por node mqtt-http.js mira eso. 
+*/
+
 async function requestBook(bookId) { // TODO: Ver esto
   const client = new MongoClient(mongoUri);
   try {
@@ -137,7 +142,11 @@ async function requestBook(bookId) { // TODO: Ver esto
       const existingRequest = await requestCollection.findOne({ _id: objectId });
 
       if (!existingRequest) {
-        await requestCollection.insertOne({ _id: objectId });
+        /*doc = {
+        _id: objectId,
+        title: book.content.title
+      }*/ 
+        await requestCollection.insertOne({ _id: objectId }); // Proba metiendole el doc acá es más fácil de distinguir por título de libro.
         await myBooksCollection.insertOne({ _id: objectId });
         console.log(`Libro: ${book.content.title} solicitado exitosamente. `);
         return true;
