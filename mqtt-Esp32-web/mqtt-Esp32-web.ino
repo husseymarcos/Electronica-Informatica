@@ -95,7 +95,7 @@ void loop() {
       // MQTT_CLIENT.subscribe("library/books"); // Escucha lo que se publique en addBooks. 
 
       //MQTT_CLIENT.publish("library/registerUsers", uuidCharArray); 
-      MQTT_CLIENT.publish("library/usersVerification", uuidCharArray); // --> Considero que acá está el error. Debo ver una forma, de que solo lo haga una vez por cada tarjeta y no todo el tiempo. 
+      MQTT_CLIENT.publish("library/usersVerification", uuidCharArray);  
       Serial.println("Mensaje enviado al topic library/usersVerification. ");
 
       lastUUID = uuid;
@@ -135,8 +135,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
 */
  
 
-// Función de callback para manejar los mensajes MQTT - ConfirmVerification
-void callback(char* topic, byte* payload, unsigned int length) {
+// Función de callback para manejar los mensajes MQTT 
+void callback(char* topic, byte* payload, unsigned int length) { // TODO: Ver como puedo informar la parte del libro solicitado por acá.
   Serial.println("Callback ejecutado");
   Serial.println("Mensaje recibido [");
   Serial.print(topic);

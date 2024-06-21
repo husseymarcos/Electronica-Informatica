@@ -142,12 +142,12 @@ async function requestBook(bookId) { // TODO: Ver esto
       const existingRequest = await requestCollection.findOne({ _id: objectId });
 
       if (!existingRequest) {
-        /*doc = {
-        _id: objectId,
-        title: book.content.title
-      }*/ 
-        await requestCollection.insertOne({ _id: objectId }); // Proba metiendole el doc acá es más fácil de distinguir por título de libro.
-        await myBooksCollection.insertOne({ _id: objectId });
+        const doc = {
+          _id: objectId,
+          title: book.content.title
+        }  
+        await requestCollection.insertOne(doc); 
+        await myBooksCollection.insertOne(doc);
         console.log(`Libro: ${book.content.title} solicitado exitosamente. `);
         return true;
       } else {
@@ -166,7 +166,19 @@ async function requestBook(bookId) { // TODO: Ver esto
   }
 }
 
+// TODO: Devolución del libro
 
+/*Posible forma de realizar la devolución, sería poner una sección: 
+
+En primer lugar, una sección donde el usuario por tarjeta, tiene libros asociados, por lo que:
+
+1. Puede elegir que libro quiere devolver
+2. Poner un botón para devolver, donde cuando lo presiona, reincorpora el libro a la base de datos inicial. library/books.
+*/
+
+async function returnBook(){
+  
+}
 
 
 
