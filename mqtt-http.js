@@ -143,6 +143,8 @@ app.post('/api/books/request', async (req, res) => { // TODO:
 
   mqttClient.publish(responseTopic, status ? "libro disponible" : "libro no disponible");
 
+ 
+  
   /*mqttClient.publish('library/bookRequests', bookId, (err) => {
     console.log("Estoy ejecutando la publicación en el topic library/bookRequests");
     if (err) {
@@ -163,6 +165,21 @@ app.post('/api/books/request', async (req, res) => { // TODO:
     res.status(500).send("Error al solicitar el libro.");
   } finally {
     pendingRequests.delete(responseTopic);
+  }
+});
+
+
+// Manejar los mensajes recibidos en los tópicos de respuesta - Solicitud de libro
+mqttClient.on('message', (topic, message) =>{
+  if(topic === 'library/bookRequests/#' ){
+    if (pendingRequests.has(topic)) {
+      const { resolve } = pendingRequests.get(topic);
+      resolve(message.toString());
+      pendingRequests.delete(topic);
+      console.log(`Promesa resuelta para el tópico ${topic}`);
+   } else {
+      console.log(`No hay promesas pendientes para el tópico ${topic}`);
+    }
   }
 });
 
