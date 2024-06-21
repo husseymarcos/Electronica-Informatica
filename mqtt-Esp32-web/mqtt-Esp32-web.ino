@@ -213,9 +213,14 @@ void reconnect() {
         Serial.println("Estoy suscripto a library/confirmVerification");
       }
 
+      if(MQTT_CLIENT.subscribe("library/bookRequests")){
+        Serial.println("Estoy suscripto a library/bookRequests");
+      }
+
       if(MQTT_CLIENT.subscribe("library/myBooks")){
         Serial.println("Estoy suscripto a library/myBooks");
       }
+
       
 
     } else{
