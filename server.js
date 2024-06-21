@@ -3,6 +3,9 @@ const { MongoClient } = require('mongodb');
 const mqtt = require("mqtt");
 const config = require('./config');
 
+// pendingRequests para el manejo de las solicitudes de libros
+const { pendingRequests } = require('./mqtt-http');
+
 // Configuración de MongoDB
 const mongoUri = `mongodb://${config.mongodb.hostname}:${config.mongodb.port}/${config.mongodb.database}`;
 
@@ -238,8 +241,19 @@ mqttClient.on("message", async (topic, message) => {
       const book = await bookCollection.findOne({ _id: bookId }); // Chequea que el libro esté.
       console.log(`Libro: ${book.title} solicitado exitosamente. `);
     }
-  }
 
+    // Logica que está hecha en mqtt-http.js lo traemos acá porque está declarado por este lado. 
+    // Manejar los mensajes recibidos en los tópicos de respuesta - Solicitud de libro
+    console.log(`Mensaje recibido en el tópico ${topic}: ${message}`);
+    if (pendingRequests.has(topic)) {
+      const { resolve } = pendingRequests.get(topic);
+      resolve(message.toString());
+      pendingRequests.delete(topic);
+      console.log(`Promesa resuelta para el tópico ${topic}`);
+    } else {
+      console.log(`No hay promesas pendientes para el tópico ${topic}`);
+    }
+  }
 });
 
 module.exports = {

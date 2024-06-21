@@ -38,15 +38,6 @@ mqttClient.on('connect', () => { // Si aca jode agregando 40 datos, es que el pr
       console.log("Suscrito a library/usersVerification/#");
     } 
   })
-
-  mqttClient.subscribe('library/bookRequests/#', (err) => {
-    if(err){
-      console.error("Error al suscribirse a los tópicos de solicitud de libros:", err);
-    } else {
-      console.log("Suscrito a library/bookRequests/#");
-    }
-  })
-
 });
 
 
@@ -133,9 +124,6 @@ app.post('/api/rfid/verification', async (req, res) => {
 - Endpoint: /api/books/request
 
 - bookId = req.body.id; // En lugar de req.params.id
-
-
-
 */ 
 app.post('/api/books/request', async (req, res) => { // TODO: 
   const bookId = req.body.id; // req.body.id; // En lugar de req.params.id
@@ -180,8 +168,6 @@ app.post('/api/books/request', async (req, res) => { // TODO:
 
 
 
-
-
 // Manejar los mensajes recibidos en los tópicos de respuesta - Verificación de RFID
 mqttClient.on('message', (topic, message) => {
   if(topic === 'library/usersVerification/#' ){
@@ -204,20 +190,6 @@ mqttClient.on('message', (topic, message) => {
     }
   });
 
-
-  // Manejar los mensajes recibidos en los tópicos de respuesta - Solicitud de libros
-  // TODO: Evaluar si esto tiene sentido
-
-  if(topic === 'library/bookRequests/#' ){
-  if (pendingRequests.has(topic)) {
-      const { resolve } = pendingRequests.get(topic);
-      resolve(message.toString());
-      pendingRequests.delete(topic);
-      console.log(`Promesa resuelta para el tópico ${topic}`);
-    } else {
-      console.log(`No hay promesas pendientes para el tópico ${topic}`);
-    }
-  }
 });
 
 
@@ -243,3 +215,6 @@ server.on('upgrade', (request, socket, head) => {
 
 
 
+module.exports = {
+  pendingRequests
+};
