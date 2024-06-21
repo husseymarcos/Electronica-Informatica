@@ -188,7 +188,7 @@ mqttClient.on("connect", () => {
     "library/books",
     "library/registerUsers",
     "library/usersVerification",
-    "library/bookRequests",
+    "library/bookRequests/#",
     "library/myBooks"
   ];
 
@@ -229,12 +229,12 @@ mqttClient.on("message", async (topic, message) => {
     }
   }
 
-  if (topic.startsWith("library/bookRequests")) { // TODO: Ver esto
+  if (topic.startsWith("library/bookRequests/")) { // TODO: Ver esto
     const bookId = topic.split('/').pop();
     console.log(bookId);
     const status = await requestBook(bookId);
     console.log("Status: ", status);
-    if(status){
+    if(status){ // Esto lo hago para poder acceder el título del libro e informar de forma más detallada. El chequeo se hace previamente en requestBook.
       const bookCollection = database.collection(config.mongodb.bookCollection);
       const book = await bookCollection.findOne({ _id: bookId }); // Chequea que el libro esté.
       console.log(`Libro: ${book.title} solicitado exitosamente. `);

@@ -27,8 +27,6 @@ const wss = new WebSocket.Server({ noServer: true });
 // Mapa para almacenar las promesas pendientes de verificación
 const pendingVerifications = new Map();
 
-// Mapa para almacenar las promesas de solicitud de libros
-const pendingRequests = new Map();
 
 mqttClient.on('connect', () => { // Conexión a MQTT
   mqttClient.subscribe('library/usersVerification/#', (err) =>{
@@ -93,7 +91,7 @@ app.post('/api/rfid/verification', async (req, res) => {
   })
 
 
-  // mqttClient.publish(responseTopic, isAuthorized ? "authorized": "unathorized");
+  mqttClient.publish(responseTopic, isAuthorized ? "authorized": "unathorized");
   
   try{ 
     const status = await verificationPromise;
@@ -129,58 +127,16 @@ app.post('/api/books/request', async (req, res) => { // TODO:
   const bookId = req.body.id; // req.body.id; // En lugar de req.params.id
   console.log(bookId);
 
-  const responseTopic = `library/bookRequests/${bookId}`;
-
-  if (pendingRequests.has(responseTopic)) {
-    return res.status(429).send("Verification already in progress.");
-  }
-
-  const requestPromise = new Promise((resolve, reject) => {
-    pendingRequests.set(responseTopic, { resolve, reject });
+  requestBook(bookId).then(() => {
+    res.status(200).send("Libro solicitado exitosamente.");
+  }).catch((error) => {
+    console.error("Error al solicitar el libro: ", error);
+    res.status(500).send("Error al solicitar el libro.");
   });
 
-  const status = await requestBook(bookId);
+  const responseTopic = `library/bookRequests/${bookId}`;
 
-  mqttClient.publish(responseTopic, status ? "libro disponible" : "libro no disponible");
-
- 
-  
-  /*mqttClient.publish('library/bookRequests', bookId, (err) => {
-    console.log("Estoy ejecutando la publicación en el topic library/bookRequests");
-    if (err) {
-      console.error("Error al publicar en MQTT:", err);
-      res.status(500).send("Error al solicitar el libro.");
-      pendingRequests.delete(responseTopic);
-    }
-  });*/
-
-  try {
-    const status = await requestPromise;
-    if (status === 'libro disponible') {
-      res.json({ status: 'success', message: 'libro disponible' });
-    } else {
-      res.status(403).json({ status: 'error', message: 'libro no disponible' });
-    }
-  } catch (error) {
-    res.status(500).send("Error al solicitar el libro.");
-  } finally {
-    pendingRequests.delete(responseTopic);
-  }
-});
-
-
-// Manejar los mensajes recibidos en los tópicos de respuesta - Solicitud de libro
-mqttClient.on('message', (topic, message) =>{
-  if(topic === 'library/bookRequests/#' ){
-    if (pendingRequests.has(topic)) {
-      const { resolve } = pendingRequests.get(topic);
-      resolve(message.toString());
-      pendingRequests.delete(topic);
-      console.log(`Promesa resuelta para el tópico ${topic}`);
-   } else {
-      console.log(`No hay promesas pendientes para el tópico ${topic}`);
-    }
-  }
+  mqttClient.publish(responseTopic, bookId);
 });
 
 
