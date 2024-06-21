@@ -36,8 +36,8 @@ PubSubClient MQTT_CLIENT;
 MFRC522 mfrc522(SS_PIN, RST_PIN); 
 
 // Nombre y contraseña de tu red WiFi.
-const char* ssid = "Telecentro-40fe";
-const char* password = "898PHFSD88L7";
+const char* ssid = "Fibertel Wifi682 2.4Ghz";
+const char* password = "01421499959";
 
 String lastUUID = ""; 
 
@@ -193,7 +193,7 @@ void reconnect() {
   // MQTT_CLIENT.setServer("192.168.1.206", 1883); // si uso un servidor local <ver IP correcta>
 
   MQTT_CLIENT.setClient(WIFI_CLIENT);
-  MQTT_CLIENT.setServer("52.54.99.103", 1883);  // public IP
+  MQTT_CLIENT.setServer("3.92.240.228", 1883);  // public IP
   
   // Intentando conectar con el broker.
   while (!MQTT_CLIENT.connected()) {
