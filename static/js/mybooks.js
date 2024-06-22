@@ -22,7 +22,6 @@ function fetchMyBooks() {
                     <p>Autor: ${content.author}</p>
                     <p>Género: ${content.genre}</p>
                     <p>Año: ${content.year}</p>
-                    <button onclick="returnBook('${book._id}')">Devolver</button>
                 `;
                 booksList.appendChild(listItem);
             });
@@ -35,8 +34,8 @@ function fetchMyBooks() {
 }
 
 
-
-function returnBook(bookId) {
+// TODO: La parte de devolución, lo podemos ver en un branch aparte de última, porque debo reevaluar la lógica para borrar de la db, y todas esas cuestiones.
+/*function returnBook(bookId) { // TODO: Este debe devolver el libro, a la base de datos. Para que pueda volver a ser solicitado.
     console.log("Id del libro devuelto: ", bookId);
     
     fetch('/api/mybooks', {  // TODO: Ver si esto tiene sentido
@@ -60,4 +59,4 @@ function returnBook(bookId) {
         messageElement.innerText = "Error al devolver el libro. Por favor, intenta nuevamente.";
         messageElement.style.color = 'red';
     });
-}
+}*/

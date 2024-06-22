@@ -131,7 +131,7 @@ app.post('/api/rfid/verification', async (req, res) => {
 
     if(isAuthorized && status === 'authorized'){ // verifyCard, es el que chequea en usersVerification.
       res.json({status: 'success', message: 'authorized'});
-      
+
       confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`).catch(console.dir);
 
       mqttClient.publish('library/confirmVerification', `Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
@@ -151,12 +151,10 @@ app.post('/api/rfid/verification', async (req, res) => {
 
 // Ruta para SOLICITUD de LIBROS
 
-app.post('/api/books/request', async (req, res) => { // TODO: 
-  const bookId = req.body.id; 
-  const titleOfBook = req.body.title; // TODO: ver por qué acá se pasa como undefined. 
+app.post('/api/books/request', async (req, res) => { 
+  const bookId = req.body.id;  
   console.log("BookId desde /api/books/request: ",bookId);
-  console.log("titleOfBook desde /api/books/request: ", titleOfBook);
-
+  
   try{
     const status = await requestBook(bookId);
     console.log("Status desde /api/books/request: ", status);
@@ -166,7 +164,7 @@ app.post('/api/books/request', async (req, res) => { // TODO:
       const responseTopic = `library/bookRequests/${bookId}`; // Aca realizo un publish a library/bookRequests/#
 
       // Esto es lo que va a informarse por Serial Monitor del Arduino
-      mqttClient.publish(responseTopic, `El libro con el ID: ${bookId}, es decir ${titleOfBook} fue solicitado correctamente`);
+      mqttClient.publish(responseTopic, `El libro con el ID: ${bookId} fue solicitado correctamente`);
 
     } else{
       res.status(409).send("Libro solicitado anteriormente.");

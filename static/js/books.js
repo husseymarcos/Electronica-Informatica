@@ -48,7 +48,7 @@ Es probable que tenga que armarse similar a la parte de rfid/verification.
 function requestBook(bookId) {
     console.log("Id del libro solicitado: ", bookId);
     
-    fetch('/api/books/request', { // Antes era así --> `/api/books/request/${bookId}`
+    fetch('/api/books/request', { 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -66,7 +66,7 @@ function requestBook(bookId) {
     .catch(error => {
         console.error('Error:', error);
         const messageElement = document.getElementById('message');
-        messageElement.innerText = "Error al solicitar el libro. Por favor, intenta nuevamente.";
+        messageElement.innerText = "Error al solicitar el libro. El libro aún no fue devuelto.";
         messageElement.style.color = 'red';
     });
 }
