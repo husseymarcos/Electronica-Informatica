@@ -13,6 +13,7 @@ const { requestBook } = require('./server');
 const {mongoUri} = require('./server');
 
 const {mqttClient} = require('./server');
+const { request } = require('http');
 
 
 
@@ -146,26 +147,45 @@ app.post('/api/rfid/verification', async (req, res) => {
 
 // Ruta para SOLICITUD de LIBROS
 
-/*Posibles cambios que tenga que hacer:
-
-- Endpoint: /api/books/request
-
-- bookId = req.body.id; // En lugar de req.params.id
-*/ 
 app.post('/api/books/request', async (req, res) => { // TODO: 
-  const bookId = req.body.id; // req.body.id; // En lugar de req.params.id
+  const bookId = req.body.id; 
+  const titleOfBook = req.body.title;
   console.log(bookId);
+  console.log(titleOfBook);
 
-  requestBook(bookId).then(() => {
-    res.status(200).send("Libro solicitado exitosamente.");
+  try{
+    const status = await requestBook(bookId);
+
+    if(status){
+      res.status(200).send("Libro solicitado exitosamente.");
+      const responseTopic = `library/bookRequests/${bookId}`; // Aca realizo un publish a library/bookRequests/#
+      mqttClient.publish(responseTopic, `El libro con el ID: ${bookId}, es decir ${titleOfBook} fue solicitado correctamente`);
+
+    } else{
+      res.status(409).send("Libro solicitado anteriormente.");
+    }
+  } catch (error){
+    console.error("Error al solicitar el libro: ", error);
+    res.status(500).send("Error al solicitar el libro");
+  }
+
+  /*requestBook(bookId).then(() => {
+    if(requestBook(bookId)){ // El status dio true, por lo que salió todo bien
+      res.status(200).send("Libro solicitado exitosamente.");
+    } else{ // El status dio false, porque el libro ya fue pedido. No podes pedirlo 2 veces 
+      res.status(500).send("Libro solicitado anteriormente.");
+    }
   }).catch((error) => {
     console.error("Error al solicitar el libro: ", error);
     res.status(500).send("Error al solicitar el libro.");
   });
 
-  const responseTopic = `library/bookRequests/${bookId}`; // Aca realizo un publish a library/books/#
+  const responseTopic = `library/bookRequests/${bookId}`;
 
-  mqttClient.publish(responseTopic, bookId);
+  // Esto es lo que va a informarse por Serial Monitor del Arduino
+  mqttClient.publish(responseTopic, `El libro con el ID: ${bookId}, es decir ${titleOfBook} fue solicitado correctamente`); 
+  */
+  
 });
 
 
