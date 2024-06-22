@@ -243,20 +243,24 @@ mqttClient.on("message", async (topic, message) => {
 
   if (topic === "library/usersVerification") { 
     const uuid = messageString;
-    const isAuthorized = await verifyCard(uuid);
-    console.log("Estas autorizado? : ", isAuthorized);
+    console.log(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress. Informa server.js`);
+    //const isAuthorized = await verifyCard(uuid);
+    //console.log("Estas autorizado? : ", isAuthorized);
 
-    if (isAuthorized) {
-      confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`).catch(console.dir);
-      console.log(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
-    }
+    //if (isAuthorized) {
+      //confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`).catch(console.dir);
+      //console.log(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
+    //}
   }
 
   if (topic.startsWith("library/bookRequests/")) { // TODO: Ver esto
     const bookId = topic.split('/').pop();
     console.log(bookId);
-    const status = await requestBook(bookId);
-    console.log("Status: ", status);
+    // const status = await requestBook(bookId);
+    // Para este caso, library/bookRequests/ es el responseTopic que tenemos definido en mqtt-http.js, no es necesario volver a realizar el request.
+    // Es por eso que nos tiraba false, porque el libro desde mqtt-http.js ya fue pedido. 
+    // console.log("Status: ", status);
+    console.log(`Libro con el id: ${bookId} fue solicitado exitosamente. Informa server.js.`);
   }
 });
 
@@ -265,5 +269,6 @@ module.exports = {
   mqttClient,
   mongoUri,
   verifyCard,
-  requestBook
+  requestBook,
+  confirmVerification
 };

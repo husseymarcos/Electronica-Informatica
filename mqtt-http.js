@@ -13,8 +13,8 @@ const { requestBook } = require('./server');
 const {mongoUri} = require('./server');
 
 const {mqttClient} = require('./server');
-const { request } = require('http');
 
+const {confirmVerification} = require('./server');
 
 
 // Crear una aplicación Express
@@ -122,6 +122,7 @@ app.post('/api/rfid/verification', async (req, res) => {
 
 
   mqttClient.publish(responseTopic, isAuthorized ? "authorized": "unathorized");
+
   
   try{ 
     const status = await verificationPromise;
@@ -130,6 +131,9 @@ app.post('/api/rfid/verification', async (req, res) => {
 
     if(isAuthorized && status === 'authorized'){ // verifyCard, es el que chequea en usersVerification.
       res.json({status: 'success', message: 'authorized'});
+      
+      confirmVerification(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`).catch(console.dir);
+
       mqttClient.publish('library/confirmVerification', `Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress`);
     } else {
       res.status(403).json({status: 'error', message: 'unathorized'});
@@ -149,16 +153,19 @@ app.post('/api/rfid/verification', async (req, res) => {
 
 app.post('/api/books/request', async (req, res) => { // TODO: 
   const bookId = req.body.id; 
-  const titleOfBook = req.body.title;
-  console.log(bookId);
-  console.log(titleOfBook);
+  const titleOfBook = req.body.title; // TODO: ver por qué acá se pasa como undefined. 
+  console.log("BookId desde /api/books/request: ",bookId);
+  console.log("titleOfBook desde /api/books/request: ", titleOfBook);
 
   try{
     const status = await requestBook(bookId);
+    console.log("Status desde /api/books/request: ", status);
 
     if(status){
       res.status(200).send("Libro solicitado exitosamente.");
       const responseTopic = `library/bookRequests/${bookId}`; // Aca realizo un publish a library/bookRequests/#
+
+      // Esto es lo que va a informarse por Serial Monitor del Arduino
       mqttClient.publish(responseTopic, `El libro con el ID: ${bookId}, es decir ${titleOfBook} fue solicitado correctamente`);
 
     } else{
