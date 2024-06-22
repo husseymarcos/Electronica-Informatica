@@ -59,3 +59,9 @@ function fetchMyBooks() {
         messageElement.style.color = 'red';
     });
 }*/
+
+// Entry point when the page loads
+document.addEventListener("DOMContentLoaded", function() {
+    // Fetch all books when the page loads
+    fetchMyBooks();
+});
