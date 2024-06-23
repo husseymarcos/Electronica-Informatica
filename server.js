@@ -191,8 +191,8 @@ async function returnBook(bookIdToReturn){ // Acá vamos a usar el libro que des
     // Debo eliminarlo de bookRequests y myBooks
     const requestCollection = database.collection(config.mongodb.bookRequestCollection);
     const myBooksCollection = database.collection(config.mongodb.myBooksCollection);
-    await myBooksCollection.deleteOne(objectId); // Si tira error nuevamente probá con: { _id: objectId }
-    await requestCollection.deleteOne(objectId);
+    await myBooksCollection.deleteOne({ _id: objectId }); 
+    await requestCollection.deleteOne({ _id: objectId });
 
     console.log(`El libro con el ID: ${bookIdToReturn} fue devuelto exitosamente.`);
     return true; // TODO: Ver que quizá el hecho de tener un boolean nos sirve de algo.
