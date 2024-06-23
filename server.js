@@ -141,6 +141,12 @@ async function requestBook(bookId) { // TODO: Ver esto
 
       const existingRequest = await requestCollection.findOne({ _id: objectId });
 
+      // TODO: La lógica que falta aquí, es eliminar el libro de la base de datos de books, de esa forma no aparece en los libros para ser solicitados.
+      const deleteBook = await bookCollection.deleteOne({ _id: objectId }); // Acá removemos el libro que tenga esa id. Pero lo guardamos en esa variable.
+      // TODO: deleteBook, puede usarse para el método de returnBook, fijate como podría vincularse.
+
+      returnBook(deleteBook);
+
       if (!existingRequest) {
         const doc = {
           _id: objectId,
@@ -162,7 +168,7 @@ async function requestBook(bookId) { // TODO: Ver esto
       return false; // El libro no se encontró.
     }
   } catch (error) {
-    console.error("Error requesting book:", error);
+    console.error("Error solicitando libro:", error);
     return 'error';
   } finally {
     await client.close();
@@ -179,8 +185,28 @@ En primer lugar, una sección donde el usuario por tarjeta, tiene libros asociad
 2. Poner un botón para devolver, donde cuando lo presiona, reincorpora el libro a la base de datos inicial. library/books.
 */
 
-async function returnBook(){
-  
+async function returnBook(bookToReturn){ // Acá vamos a usar el libro que desea devolver el usuario. 
+  const client = new MongoClient(mongoUri);
+  try {
+    await client.connect();
+    const database = client.db(config.mongodb.database);
+
+    // Debo eliminarlo de bookRequests y myBooks
+    const requestCollection = database.collection(config.mongodb.bookRequestCollection);
+    const myBooksCollection = database.collection(config.mongodb.myBooksCollection);
+    const bookCollection = database.collection(config.mongodb.bookCollection);
+
+    await bookCollection.insertOne(bookToReturn); // Vuelve a insertar el libro que fue pedido anteriormente.
+    await myBooksCollection.deleteOne(bookToReturn);
+    await requestCollection.deleteOne(bookToReturn);
+    console.log(`El libro ${bookToReturn.title} fue devuelto exitosamente.`);
+    return true; // TODO: Ver que quizá el hecho de tener un boolean nos sirve de algo.
+  } catch (error){
+    console.error("Error devolviendo libro:", error);
+    return false;
+  } finally {
+    await client.close();
+  }
 }
 
 
