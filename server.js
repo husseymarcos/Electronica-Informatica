@@ -179,18 +179,22 @@ En primer lugar, una sección donde el usuario por tarjeta, tiene libros asociad
 2. Poner un botón para devolver, donde cuando lo presiona, reincorpora el libro a la base de datos inicial. library/books.
 */
 
-async function returnBook(bookToReturn){ // Acá vamos a usar el libro que desea devolver el usuario. 
+async function returnBook(bookIdToReturn){ // Acá vamos a usar el libro que desea devolver el usuario. 
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
     const database = client.db(config.mongodb.database);
 
+    const objectId = new ObjectId(bookIdToReturn);
+    // FIXME: Casteo del dato de bookToReturn. 
+
     // Debo eliminarlo de bookRequests y myBooks
     const requestCollection = database.collection(config.mongodb.bookRequestCollection);
     const myBooksCollection = database.collection(config.mongodb.myBooksCollection);
-    await myBooksCollection.deleteOne(bookToReturn);
-    await requestCollection.deleteOne(bookToReturn);
-    console.log(`El libro ${bookToReturn.title} fue devuelto exitosamente.`);
+    await myBooksCollection.deleteOne(objectId); // Si tira error nuevamente probá con: { _id: objectId }
+    await requestCollection.deleteOne(objectId);
+
+    console.log(`El libro con el ID: ${bookIdToReturn} fue devuelto exitosamente.`);
     return true; // TODO: Ver que quizá el hecho de tener un boolean nos sirve de algo.
   } catch (error){
     console.error("Error devolviendo libro:", error);
