@@ -36,6 +36,8 @@ PubSubClient MQTT_CLIENT;
 MFRC522 mfrc522(SS_PIN, RST_PIN); 
 
 // Nombre y contraseña de tu red WiFi.
+// Red de la facu: "UA-Alumnos"
+// contra de la facu: "41umn05WLC"
 const char* ssid = "Telecentro-40fe";
 const char* password = "898PHFSD88L7";
 
