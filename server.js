@@ -121,12 +121,7 @@ Casos de solicitud del mismo libro:
 
 */ 
 
-/*TODO:
-
-Fijate que no te duplique las cosas tanto por node server.js, como por node mqtt-http.js mira eso. 
-*/
-
-async function requestBook(bookId) { // TODO: Ver esto
+async function requestBook(bookId) { 
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
@@ -169,15 +164,7 @@ async function requestBook(bookId) { // TODO: Ver esto
   }
 }
 
-// TODO: Devolución del libro
 
-/*Posible forma de realizar la devolución, sería poner una sección: 
-
-En primer lugar, una sección donde el usuario por tarjeta, tiene libros asociados, por lo que:
-
-1. Puede elegir que libro quiere devolver
-2. Poner un botón para devolver, donde cuando lo presiona, reincorpora el libro a la base de datos inicial. library/books.
-*/
 
 async function returnBook(bookIdToReturn){ // Acá vamos a usar el libro que desea devolver el usuario. 
   const client = new MongoClient(mongoUri);
@@ -186,8 +173,7 @@ async function returnBook(bookIdToReturn){ // Acá vamos a usar el libro que des
     const database = client.db(config.mongodb.database);
 
     const objectId = new ObjectId(bookIdToReturn);
-    // FIXME: Casteo del dato de bookToReturn. 
-
+    
     // Debo eliminarlo de bookRequests y myBooks
     const requestCollection = database.collection(config.mongodb.bookRequestCollection);
     const myBooksCollection = database.collection(config.mongodb.myBooksCollection);
@@ -195,7 +181,7 @@ async function returnBook(bookIdToReturn){ // Acá vamos a usar el libro que des
     await requestCollection.deleteOne({ _id: objectId });
 
     console.log(`El libro con el ID: ${bookIdToReturn} fue devuelto exitosamente.`);
-    return true; // TODO: Ver que quizá el hecho de tener un boolean nos sirve de algo.
+    return true; 
   } catch (error){
     console.error("Error devolviendo libro:", error);
     return false;
@@ -282,9 +268,9 @@ mqttClient.on("message", async (topic, message) => {
   no me interesa almacenar en una db que libros fueron devueltos. Quizá debería definirlo, 
   pero puede ser que tenga sentido lo que estoy pensando. 
   
-  Si no funciona, definilo como una collection que guarde todas las devoluciones, en este caso returnNotification.
+  FUNCIONA ESPECTACULARMENTE!
   */
-  if (topic.startsWith("library/returnNotification/")) { // TODO: si no funciona como lo estás pensando, fijate de ponerlo como collection en la db.
+  if (topic.startsWith("library/returnNotification/")) { 
     const bookId = topic.split('/').pop();
     console.log(bookId);
     console.log(`Libro con el id: ${bookId} fue devuelto exitosamente. Informa server.js.`);

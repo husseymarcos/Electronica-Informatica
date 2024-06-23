@@ -61,18 +61,7 @@ app.get('/api/books', async (req, res) => {
   }
 });
 
-// TODO: Hacer algo similar para obtener todos los libros, pero asociado a cada tarjeta!
-// TODO: Hacer la lógica para devolver los libros ASOCIADOS A CADA TARJETA. Es decir, los libros que solicito cada usuario.
 
-/*Posible forma de implementarlo:
-Es posible informar en la database de myBooks, el id del usuario que solicitó. Y comparar mediante eso, es decir:
-
-Tener un parámetro denominado uuid, donde si es determinado uuid, devuelva determinados libros y lo mismo con el otro uuid.
-
-TODO: Ver como podría implementarse. Notemos que no sé cada uuid, de cada tarjeta, debería hacerse de forma "automática".
-*/ 
-
-// TODO: Ver acá donde entra la lógica para implementar el returnBook, implementado en server.js
 
 app.get('/api/mybooks', async (req, res) => {
   const client = new MongoClient(mongoUri);
@@ -176,6 +165,7 @@ app.post('/api/books/request', async (req, res) => {
     res.status(500).send("Error al solicitar el libro");
   } 
 });
+
 
 // Ruta para DEVOLUCIÓN DE LIBROS
 app.post('/api/mybooks/return', async (req, res) => { 
