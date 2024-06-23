@@ -193,7 +193,7 @@ void reconnect() {
   // MQTT_CLIENT.setServer("192.168.1.206", 1883); // si uso un servidor local <ver IP correcta>
 
   MQTT_CLIENT.setClient(WIFI_CLIENT);
-  MQTT_CLIENT.setServer("54.156.53.99", 1883);  // public IP
+  MQTT_CLIENT.setServer("3.94.253.167", 1883);  // public IP
   
   // Intentando conectar con el broker.
   while (!MQTT_CLIENT.connected()) {
