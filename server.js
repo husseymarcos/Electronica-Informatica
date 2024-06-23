@@ -136,16 +136,10 @@ async function requestBook(bookId) { // TODO: Ver esto
     const book = await bookCollection.findOne({ _id: objectId }); // Chequea que el libro esté.
 
     if (book) {
-      const requestCollection = database.collection(config.mongodb.bookRequestCollection); // TODO: Es necesario tener esta collection?
+      const requestCollection = database.collection(config.mongodb.bookRequestCollection); 
       const myBooksCollection = database.collection(config.mongodb.myBooksCollection);
 
       const existingRequest = await requestCollection.findOne({ _id: objectId });
-
-      // TODO: La lógica que falta aquí, es eliminar el libro de la base de datos de books, de esa forma no aparece en los libros para ser solicitados.
-      const deleteBook = await bookCollection.deleteOne({ _id: objectId }); // Acá removemos el libro que tenga esa id. Pero lo guardamos en esa variable.
-      // TODO: deleteBook, puede usarse para el método de returnBook, fijate como podría vincularse.
-
-      returnBook(deleteBook);
 
       if (!existingRequest) {
         const doc = {
@@ -194,9 +188,6 @@ async function returnBook(bookToReturn){ // Acá vamos a usar el libro que desea
     // Debo eliminarlo de bookRequests y myBooks
     const requestCollection = database.collection(config.mongodb.bookRequestCollection);
     const myBooksCollection = database.collection(config.mongodb.myBooksCollection);
-    const bookCollection = database.collection(config.mongodb.bookCollection);
-
-    await bookCollection.insertOne(bookToReturn); // Vuelve a insertar el libro que fue pedido anteriormente.
     await myBooksCollection.deleteOne(bookToReturn);
     await requestCollection.deleteOne(bookToReturn);
     console.log(`El libro ${bookToReturn.title} fue devuelto exitosamente.`);
@@ -241,7 +232,8 @@ mqttClient.on("connect", () => {
     "library/registerUsers",
     "library/usersVerification",
     "library/bookRequests/#",
-    "library/myBooks"
+    "library/myBooks",
+    "library/returnNotification"
   ];
 
   topics.forEach(topic => {
@@ -275,10 +267,23 @@ mqttClient.on("message", async (topic, message) => {
     console.log(`Tarjeta con UUID ${uuid} ingresó correctamente a LibrosExpress. Informa server.js`);
   }
 
-  if (topic.startsWith("library/bookRequests/")) { // TODO: Ver esto
+  if (topic.startsWith("library/bookRequests/")) { 
     const bookId = topic.split('/').pop();
     console.log(bookId);
     console.log(`Libro con el id: ${bookId} fue solicitado exitosamente. Informa server.js.`);
+  }
+
+  /*TODO: Así es como lo estoy pensando, no considero que cada topic necesariamente deba ser una collection, 
+  lo que considero es que el topic se define aquí y solo le hago publicaciones, que recibe arduino y punto,
+  no me interesa almacenar en una db que libros fueron devueltos. Quizá debería definirlo, 
+  pero puede ser que tenga sentido lo que estoy pensando. 
+  
+  Si no funciona, definilo como una collection que guarde todas las devoluciones, en este caso returnNotification.
+  */
+  if (topic.startsWith("library/returnNotification/")) { // TODO: si no funciona como lo estás pensando, fijate de ponerlo como collection en la db.
+    const bookId = topic.split('/').pop();
+    console.log(bookId);
+    console.log(`Libro con el id: ${bookId} fue devuelto exitosamente. Informa server.js.`);
   }
 });
 
@@ -288,5 +293,6 @@ module.exports = {
   mongoUri,
   verifyCard,
   requestBook,
-  confirmVerification
+  confirmVerification,
+  returnBook
 };

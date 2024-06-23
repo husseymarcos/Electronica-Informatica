@@ -146,7 +146,7 @@ void callback(char* topic, byte* payload, unsigned int length) { // TODO: Ver co
   msg[length] = '\0';
   Serial.println(msg);
 
-  DynamicJsonDocument doc(1024);
+  /*DynamicJsonDocument doc(1024);
   DeserializationError error = deserializeJson(doc, payload, length);
 
   if(error){
@@ -184,7 +184,7 @@ void callback(char* topic, byte* payload, unsigned int length) { // TODO: Ver co
   if(String(topic) == "library/myBooks"){
     Serial.print("Actualización en library/mybooks: ");
     Serial.println((char*) payload);
-  }
+  }*/
 
 }
 
@@ -221,7 +221,9 @@ void reconnect() {
         Serial.println("Estoy suscripto a library/myBooks");
       }
 
-      
+      if(MQTT_CLIENT.subscribe("library/returnNotification/#")){
+        Serial.println("Estoy suscripto a library/returnNotification/#");
+      }
 
     } else{
       Serial.print("Error de conexión - Estado: ");

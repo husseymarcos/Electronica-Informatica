@@ -16,6 +16,8 @@ const {mqttClient} = require('./server');
 
 const {confirmVerification} = require('./server');
 
+const {returnBook} = require('./server');
+
 
 // Crear una aplicación Express
 const app = express();
@@ -172,26 +174,35 @@ app.post('/api/books/request', async (req, res) => {
   } catch (error){
     console.error("Error al solicitar el libro: ", error);
     res.status(500).send("Error al solicitar el libro");
-  }
-
-  /*requestBook(bookId).then(() => {
-    if(requestBook(bookId)){ // El status dio true, por lo que salió todo bien
-      res.status(200).send("Libro solicitado exitosamente.");
-    } else{ // El status dio false, porque el libro ya fue pedido. No podes pedirlo 2 veces 
-      res.status(500).send("Libro solicitado anteriormente.");
-    }
-  }).catch((error) => {
-    console.error("Error al solicitar el libro: ", error);
-    res.status(500).send("Error al solicitar el libro.");
-  });
-
-  const responseTopic = `library/bookRequests/${bookId}`;
-
-  // Esto es lo que va a informarse por Serial Monitor del Arduino
-  mqttClient.publish(responseTopic, `El libro con el ID: ${bookId}, es decir ${titleOfBook} fue solicitado correctamente`); 
-  */
-  
+  } 
 });
+
+// Ruta para DEVOLUCIÓN DE LIBROS
+app.post('/api/mybooks/return', async (req, res) => { 
+  const bookId = req.body.id;  
+  console.log("BookId desde /api/mybooks/return: ",bookId);
+  
+  try{
+    const status = await returnBook(bookId);
+    console.log("Status desde /api/mybooks/return: ", status);
+
+    if(status){
+      res.status(200).send("Libro devuelto exitosamente.");
+
+      // TODO: Ver esta sección de acá, donde haría el publish?
+      const responseTopic = `library/returnNotification/${bookId}`; // Aca realizo un publish a library/bookRequests/#
+
+      // Esto es lo que va a informarse por Serial Monitor del Arduino
+      mqttClient.publish(responseTopic, `El libro con el ID: ${bookId} fue devuelto correctamente`);
+
+    } 
+  } catch (error){
+    console.error("Error al devolver el libro: ", error);
+    res.status(500).send("Error al devolver el libro");
+  } 
+});
+
+
 
 
 
